@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Portofolio {
+  id        Int      @id @default(autoincrement())
+  title     String
+  desc      String   @db.Text
+  content   String?  @db.Text
+  image     String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id    Int    @id @default(autoincrement())
+  title String
+  desc  String @db.Text
+  image String
+}
+
+model Service {
+  id    Int     @id @default(autoincrement())
+  title String
+  desc  String? @db.Text
+  link  String
+  logo  String
+}
+
+model Testimony {
+  id       Int    @id @default(autoincrement())
+  username String
+  location String
+  comment  String @db.Text
+  star     Float
+  avatar   String
+}
+
+model HeroLeft {
+  id            Int    @id @default(autoincrement())
+  Text          String
+  HighlightText String @unique
+  descText      String
+}
+
+model HeroRight {
+  id   Int    @id @default(autoincrement())
+  Text String
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  name        String
+  username    String
+  job         String?
+  avatar      String
+  bio         String?      @db.Text
+  portofolios Portofolio[]
+}
+
+model Partnership {
+  id    Int     @id @default(autoincrement())
+  name  String?
+  image String
+}
