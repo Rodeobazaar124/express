@@ -1,38 +1,71 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import path from "path";
 import moment from "moment";
 import fs from "fs";
-import { PrismaClient } from "@prisma/client";
+import { prismaClient } from "../core/database";
+import { IdValidation, validate } from "../validation/validation";
+import { ProductBodyValidation } from "../validation/ProductValidation";
 
-const Products = new PrismaClient().product;
+const product = prismaClient.product;
 
-export const createProduct = async (req: any, res: Response) => {
-  // Validasi Gambar TerUpload
-  if (req.files == null)
-    return res.status(400).json({ message: "Gambar harus di upload" });
+export const get = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.params.id) {
+      const results = await product.findMany();
+      return res.status(200).json({ data: results });
+    }
 
-  // Validasi Data yang sudah ada
-  const ProductExist = await Products.count({
-    where: {
-      title: {
-        contains: req.body.title,
+    const result = await product.findFirst({
+      where: {
+        id: parseInt(req.params.id),
       },
+    });
+
+    if (result === null) {
+      return res.status(404).json({ errors: "Data Not Found" });
+    }
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ errors: "Cannot get data or data not found" });
+  }
+};
+
+export const create = async (req: any, res: Response) => {
+  const valbody = validate(ProductBodyValidation, req.body, res);
+  if (valbody === null) {
+    return;
+  }
+  // Validasi Data yang sudah ada
+  const ProductExist = await product.count({
+    where: {
+      title: { contains: valbody.title },
     },
   });
-
-  if (ProductExist)
+  if (ProductExist > 1)
     return res.status(409).json({ error: "Product already exist" });
 
+  if (req.files === null) {
+    return res.status(400).json({
+      error: {
+        code: "MISSING_IMAGE",
+        message: "Bad Request: An image file is required for this operation.",
+        details:
+          "Please make sure to include a valid image file in the 'image' field.",
+      },
+    });
+  }
+
   // File Handler
-  const file = req.files.avatar;
+  const file = req.files.image;
   const filesize = file.data.length;
   const ext = path.extname(file.name);
   const filename = file.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-  // ${req.protocol}://${req.get("host")}
-  const url = `/images/${filename}`;
-  const allowedType = [".png", ".jpg"];
+  const url = `${process.env.PROTOCOL}://${process.env.HOST}/images/${filename}`;
 
   // Validasi File Type
+  const allowedType = [".png", ".jpg", ".svg"];
   if (!allowedType.includes(ext.toLowerCase()))
     return res.status(422).json({ message: `File Type Unsupported` });
 
@@ -46,7 +79,7 @@ export const createProduct = async (req: any, res: Response) => {
 
     // Menyimpan nama file beserta data
     try {
-      await Products.create({
+      await product.create({
         data: {
           title: req.body.title,
           image: url,
@@ -62,22 +95,18 @@ export const createProduct = async (req: any, res: Response) => {
   });
 };
 
-export const getProduct = async (req: Request, res: Response) => {
+export const update = async (req: any, res: Response) => {
   try {
-    const products = await Products.findMany();
-    return res.status(200).json(products);
-  } catch (error) {
-    console.log(`[ERROR] GetProduct: ${error}`);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+    const valbody = validate(ProductBodyValidation, req.body, res);
+    if (valbody === null) {
+      return;
+    }
 
-export const updateProduct = async (req: any, res: Response) => {
-  try {
     // Validate If data exist
-    try {
-      await Products.findFirst({ where: { id: req.params.id } });
-    } catch (error) {
+    const theProduct = await product.findFirst({
+      where: { id: parseInt(req.params.id) },
+    });
+    if (theProduct === null) {
       return res
         .status(400)
         .json({ error: `Data ${req.params.id} Not exist!` });
@@ -86,17 +115,17 @@ export const updateProduct = async (req: any, res: Response) => {
     // Validate files
 
     if (req.files == null)
-      return res.status(400).json({ message: "Gambar harus di upload" });
+      return res.status(400).json({
+        error: true,
+        message: "Image upload required",
+        details: "Image must be uploaded in the 'image' property",
+      });
 
-    const file = req.files.image;
-    const filesize = file.data.length;
-    const ext = path.extname(file.name);
-    const filename =
-      "services" + file.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-    const url = `${req.protocol}://${
-      req.get("host")
-      // "192.168.111.48:8000"
-    }/images/services/${filename}`;
+    const newfile = req.files.image;
+    const filesize = newfile.data.length;
+    const ext = path.extname(newfile.name);
+    const filename = newfile.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
+    const newurl = `${process.env.PROTOCOL}://${process.env.HOST}/images/${filename}`;
     const allowedType = [".png", ".jpg", ".svg"];
 
     if (!allowedType.includes(ext.toLowerCase()))
@@ -105,38 +134,78 @@ export const updateProduct = async (req: any, res: Response) => {
     if (filesize > 5000000)
       return res.status(422).json({ message: `File too big` });
 
-    file.mv(`public/images/services/${filename}`, async (err: Error) => {
-      if (err) return res.status(500).json({ messages: `${err.message}` });
+    newfile.mv(`public/images/${filename}`, async (err: Error) => {
+      if (err) return res.status(500).json({ messages: `Can't save file` });
     });
-    req.body.image = url;
 
     // set the data
-    const updatedService = Products.update({
-      where: { id: req.params.id },
+    await product.update({
       data: {
         desc: req.body.desc,
         title: req.body.title,
-        image: req.body.image,
+        image: newurl,
+      },
+      where: {
+        id: parseInt(req.params.id),
       },
     });
+
+    const oldfile = theProduct.image.split("/");
+    const filename_fromdb = oldfile[oldfile.length - 1];
+    fs.unlink(`public/images/${filename_fromdb}`, (err) => {
+      if (err) {
+        console.log({
+          error: err,
+          where: "updateProduct->OldFileRemover",
+        });
+      }
+    });
+
     return res.status(200).json({ message: "Data Updated Succesfully" });
   } catch (error) {
-    console.log(`[ERROR] UpdateService: ${error}`);
-    return res.status(500).json({ error: `Cannot Update ${req.params.id}` });
+    return res
+      .status(500)
+      .json({ error: `Cannot Update ${req.params.id}, (${error})` });
   }
 };
 
-export const deleteProduct = async (req: any, res: Response) => {
+export const remove = async (req: any, res: Response) => {
   try {
-    const theProduct = await Products.findFirst({
-      where: { id: Number(req.params.id) },
+    const validatedIds = validate(IdValidation, req.params.id, res);
+    if (validatedIds === null) {
+      return;
+    }
+    if (validatedIds === null) {
+      return;
+    }
+    const theProduct = await product.findFirst({
+      where: { id: validatedIds },
     });
-    const file = theProduct.image.split("/");
-    console.log(file);
-    const filename = file[file.length - 1];
-    console.log(filename);
-    fs.unlinkSync(`public/images/${filename}`);
-    await Products.delete({ where: { id: req.params.id } });
+
+    if (theProduct === null) {
+      return res
+        .status(400)
+        .json({ error: `Data ${req.params.id} Not exist!` });
+    }
+
+    await product.delete({ where: { id: parseInt(req.params.id) } });
+
+    try {
+      const file = theProduct.image.split("/");
+      const filename = file[file.length - 1];
+      fs.unlink(`public/images/${filename}`, (err) => {
+        if (err) {
+          console.log({
+            error: err,
+            where: "Product: Remove->OldFileRemover",
+          });
+        }
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: "IMAGE NOT FOUND BUT DATA DELETED" });
+    }
     res.status(200).json({ message: "Deleted Successfully" });
   } catch (error) {
     console.log(`[ERROR] deleteProduct: ${error}`);

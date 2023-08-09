@@ -24,7 +24,7 @@ model Portofolio {
 
 model Product {
   id    Int    @id @default(autoincrement())
-  title String
+  title String @unique
   desc  String @db.Text
   image String
 }
@@ -46,16 +46,18 @@ model Testimony {
   avatar   String
 }
 
-model HeroLeft {
-  id            Int    @id @default(autoincrement())
-  Text          String
-  HighlightText String @unique
-  descText      String
-}
+// enum Position {
+//   Left
+//   Right
+// }
 
-model HeroRight {
-  id   Int    @id @default(autoincrement())
-  Text String
+model Hero {
+  id       Int     @id @default(autoincrement())
+  number   Int?
+  position String
+  text     String
+  hText    String? @unique
+  desc     String?
 }
 
 model User {
@@ -63,6 +65,7 @@ model User {
   name        String
   username    String
   job         String?
+  token       String?      @db.VarChar(100)
   avatar      String
   bio         String?      @db.Text
   portofolios Portofolio[]
@@ -72,4 +75,12 @@ model Partnership {
   id    Int     @id @default(autoincrement())
   name  String?
   image String
+}
+
+model noiu_in_number {
+  id        Int @id @default(autoincrement())
+  client    Int
+  produk    Int
+  pekerjaan Int
+  tim       Int
 }

@@ -4,27 +4,27 @@ import moment from "moment";
 import fs from "fs";
 import { prismaClient } from "../core/database";
 import { IdValidation, validate } from "../validation/validation";
-import { ServiceValidation } from "../validation/ServiceValidation";
+import { TestimonyValidation } from "../validation/TestimonyValidation";
 
-const service = prismaClient.service;
+const Testimony = prismaClient.testimony;
 
 export const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.params.id) {
-      const results = await service.findMany();
+      const results = await Testimony.findMany();
       return res.status(200).json({ data: results });
     }
 
-    const results = await service.findFirst({
+    const result = await Testimony.findFirst({
       where: {
         id: parseInt(req.params.id),
       },
     });
 
-    if (results === null) {
+    if (result === null) {
       return res.status(404).json({ errors: "Data Not Found" });
     }
-    return res.status(200).json({ data: results });
+    return res.status(200).json({ data: result });
   } catch (error) {
     return res
       .status(500)
@@ -33,36 +33,36 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const create = async (req: any, res: Response) => {
-  const valbody = validate(ServiceValidation, req.body, res);
+  const valbody = validate(TestimonyValidation, req.body, res);
   if (valbody === null) {
     return;
   }
   // Validasi Data yang sudah ada
-  const ProductExist = await service.count({
+  const TestimonyExist = await Testimony.count({
     where: {
-      title: { contains: valbody.title },
+      username: { contains: valbody.title },
     },
   });
-  if (ProductExist > 1)
+  if (TestimonyExist > 1)
     return res.status(409).json({ error: "Product already exist" });
 
   if (req.files === null) {
     return res.status(400).json({
       error: {
-        code: "MISSING_LOGO",
-        message: "Bad Request: An image file is required for this operation.",
+        code: "MISSING_AVATARS",
+        message: "Bad Request: An avatar file is required for this operation.",
         details:
-          "Please make sure to include a valid image file in the 'logo' field.",
+          "Please make sure to include a valid image file in the 'avatar' field.",
       },
     });
   }
 
   // File Handler
-  const file = req.files.logo;
+  const file = req.files.avatar;
   const filesize = file.data.length;
   const ext = path.extname(file.name);
   const filename = file.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-  const url = `${process.env.PROTOCOL}://${process.env.HOST}/images/${filename}`;
+  const url = `${process.env.PROTOCOL}://${process.env.HOST}/avatars/${filename}`;
 
   // Validasi File Type
   const allowedType = [".png", ".jpg", ".svg"];
@@ -74,43 +74,42 @@ export const create = async (req: any, res: Response) => {
     return res.status(422).json({ message: `File too big` });
 
   // Menyimpan file
-  file.mv(`public/images/${filename}`, async (err: Error) => {
+  file.mv(`public/avatars/${filename}`, async (err: Error) => {
     if (err) return res.status(500).json({ messages: `${err.message}` });
 
     // Menyimpan nama file beserta data
     try {
-      await service.create({
+      await Testimony.create({
         data: {
-          title: req.body.title,
-          logo: url,
-          desc: req.body.desc,
-          link: req.body.link,
+          username: valbody.username,
+          avatar: url,
+          star: valbody.star,
+          location: valbody.location,
+          comment: valbody.comment,
         },
       });
       res.status(200).json({ message: `Created successfully` });
     } catch (error) {
       res
         .status(500)
-        .json({ message: `Error creating Product: ${error.message}` });
+        .json({ message: `Error adding new testimony: ${error.message}` });
     }
   });
 };
 
 export const update = async (req: any, res: Response) => {
   try {
-    const valbody = validate(ServiceValidation, req.body, res);
+    const valbody = validate(TestimonyValidation, req.body, res);
     if (valbody === null) {
       return;
     }
 
     // Validate If data exist
-    const theServices = await service.findFirst({
+    const thatOne = await Testimony.findFirst({
       where: { id: parseInt(req.params.id) },
     });
-    if (theServices === null) {
-      return res
-        .status(400)
-        .json({ error: `Data ${req.params.id} Not exist!` });
+    if (thatOne === null) {
+      return res.status(400).json({ error: `ID ${req.params.id} Not exist!` });
     }
 
     // Validate files
@@ -118,15 +117,15 @@ export const update = async (req: any, res: Response) => {
     if (req.files == null)
       return res.status(400).json({
         error: true,
-        message: "Image upload required",
-        details: "Image must be uploaded in the 'logo' property",
+        message: "avatar upload required",
+        details: "Image must be uploaded in the 'avatar' property",
       });
 
-    const newfile = req.files.logo;
+    const newfile = req.files.avatar;
     const filesize = newfile.data.length;
     const ext = path.extname(newfile.name);
     const filename = newfile.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-    const newurl = `${process.env.PROTOCOL}://${process.env.HOST}/images/${filename}`;
+    const newurl = `${process.env.PROTOCOL}://${process.env.HOST}/avatars/${filename}`;
     const allowedType = [".png", ".jpg", ".svg"];
 
     if (!allowedType.includes(ext.toLowerCase()))
@@ -135,28 +134,31 @@ export const update = async (req: any, res: Response) => {
     if (filesize > 5000000)
       return res.status(422).json({ message: `File too big` });
 
-    newfile.mv(`public/images/${filename}`, async (err: Error) => {
+    newfile.mv(`public/avatars/${filename}`, async (err: Error) => {
       if (err) return res.status(500).json({ messages: `Can't save file` });
     });
 
     // set the data
-    await service.update({
+    await Testimony.update({
       data: {
-        desc: req.body.desc,
-        title: req.body.title,
-        logo: newurl,
-        link: req.body.link,
+        username: valbody.username,
+        avatar: newurl,
+        star: valbody.star,
+        location: valbody.location,
+        comment: valbody.comment,
       },
-      where: { id: parseInt(req.params.id) },
+      where: {
+        id: parseInt(req.params.id),
+      },
     });
 
-    const oldfile = theServices.logo.split("/");
+    const oldfile = thatOne.avatar.split("/");
     const filename_fromdb = oldfile[oldfile.length - 1];
-    fs.unlink(`public/images/${filename_fromdb}`, (err) => {
+    fs.unlink(`public/avatars/${filename_fromdb}`, (err) => {
       if (err) {
         console.log({
           error: err,
-          where: "updateProduct->OldFileRemover",
+          where: "update: Old File Remover",
         });
       }
     });
@@ -175,7 +177,10 @@ export const remove = async (req: any, res: Response) => {
     if (validatedIds === null) {
       return;
     }
-    const theProduct = await service.findFirst({
+    if (validatedIds === null) {
+      return;
+    }
+    const theProduct = await Testimony.findFirst({
       where: { id: validatedIds },
     });
 
@@ -185,16 +190,16 @@ export const remove = async (req: any, res: Response) => {
         .json({ error: `Data ${req.params.id} Not exist!` });
     }
 
-    await service.delete({ where: { id: parseInt(req.params.id) } });
+    await Testimony.delete({ where: { id: parseInt(req.params.id) } });
 
     try {
-      const file = theProduct.logo.split("/");
+      const file = theProduct.avatar.split("/");
       const filename = file[file.length - 1];
-      fs.unlink(`public/images/${filename}`, (err) => {
+      fs.unlink(`public/avatars/${filename}`, (err) => {
         if (err) {
           console.log({
             error: err,
-            where: "Remove->OldFileRemover",
+            where: "Product: Remove: Old File Remover",
           });
         }
       });

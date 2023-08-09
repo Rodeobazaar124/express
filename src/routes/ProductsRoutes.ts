@@ -1,15 +1,21 @@
 import express, { response } from "express";
-import {
-  getProduct,
-  createProduct,
-  deleteProduct,
-  updateProduct,
-} from "../controllers/ProductsController";
-const ProductsRoutes = express.Router();
+import { create, remove, get, update } from "../controllers/ProductsController";
+// import { authMiddleware } from "../middleware/auth-middleware";
 
-ProductsRoutes.route("/").get(getProduct);
-ProductsRoutes.post("/create", createProduct);
-ProductsRoutes.route("/update/:id").put(updateProduct);
-ProductsRoutes.route("/delete/:id").delete(deleteProduct);
+const ProductsRoutes = express.Router();
+// ProductsRoutes.use(authMiddleware);
+
+// GET
+ProductsRoutes.route("/").get(get);
+ProductsRoutes.route("/:id").get(get);
+
+// CREATE
+ProductsRoutes.post("/", create);
+
+// UPDATE
+ProductsRoutes.route("/:id").patch(update);
+
+// DELETE
+ProductsRoutes.route("/:id").delete(remove);
 
 export default ProductsRoutes;

@@ -5,6 +5,7 @@
   "author": "Rodeobazaar124 <azfasa15@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "@prisma/client": "^5.0.0",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
@@ -13,11 +14,13 @@
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
     "express-validator": "^7.0.1",
+    "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.1",
     "moment": "^2.29.4",
     "prettier": "^3.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6",
+    "winston": "^3.10.0",
     "zod": "^3.21.4"
   },
   "scripts": {
