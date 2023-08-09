@@ -2,7 +2,6 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "removeComments": true,
-    "allowJs": false,
-    "outDir": "./azfasa15"
+    "outDir": "./dist"
   }
 }

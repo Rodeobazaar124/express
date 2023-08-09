@@ -30,38 +30,39 @@ async function seedDatabase() {
       },
     });
 
-    const RightText = "Together We Make";
-    const RightDesc = "Digital Product & Experiences.";
+    const leftText = "Together We Make";
+    const leftDesc = "Digital Product & Experiences.";
     const HighlightedText: String[] = [
       "Happy",
       "Inovative",
       "Distruptive",
       "Magic",
     ];
+
     await Promise.all(
       HighlightedText.map((ht: string) =>
         prisma.hero.create({
           data: {
-            position: "Right",
-            text: RightText,
+            position: "Left",
+            text: leftText,
             hText: ht,
-            desc: RightDesc,
+            desc: leftDesc,
           },
         })
       )
     );
+
     const Text: string[] = [
       "Between your business objectives and what your customers want.",
       "Between your business objectives and what your client want.",
       "Between your smth.",
       "Hmm",
     ];
-
     await Promise.all(
       Text.map(async (lt: string, i: number) =>
         prisma.hero.create({
           data: {
-            position: "Left",
+            position: "Right",
             number: i + 1,
             text: lt,
           },
@@ -105,18 +106,6 @@ async function seedDatabase() {
         job: "Frontend",
       },
     });
-
-    await Promise.all(
-      Text.map(async (lt: string, i: number) =>
-        prisma.hero.create({
-          data: {
-            position: "Left",
-            number: i + 1,
-            text: lt,
-          },
-        })
-      )
-    );
 
     const service = [
       [
@@ -178,6 +167,34 @@ async function seedDatabase() {
       ],
     ];
 
+    const partnership = [
+      [
+        "SMKN 2 SUMEDANG",
+        "SMKN 1 SUMEDANG",
+        "MIMIK",
+        "TAHU NGODING",
+        "POLDA JAWA BARAT",
+      ],
+      [
+        "https://gdrive.azfasa15.workers.dev/smea.png",
+        "https://gdrive.azfasa15.workers.dev/nesas.png",
+        "https://gdrive.azfasa15.workers.dev/mimik.png",
+        "https://gdrive.azfasa15.workers.dev/tahungoding.png",
+        "https://gdrive.azfasa15.workers.dev/polda_jabar.png",
+      ],
+    ];
+
+    partnership[0].forEach(async (_, i) => {
+      const name = partnership[0][i];
+      const image = partnership[0][i];
+      await prisma.partnership.create({
+        data: {
+          name,
+          image,
+        },
+      });
+    });
+
     testimony[0].forEach(async (_, i) => {
       const username = testimony[0][i];
       const location = testimony[1][i];
@@ -195,18 +212,6 @@ async function seedDatabase() {
         },
       });
     });
-
-    await Promise.all(
-      Text.map(async (lt: string, i: number) =>
-        prisma.hero.create({
-          data: {
-            position: "Left",
-            number: i + 1,
-            text: lt,
-          },
-        })
-      )
-    );
 
     console.log("Data berhasil ditambahkan ke database.");
   } catch (error) {

@@ -24,7 +24,9 @@
     "zod": "^3.21.4"
   },
   "scripts": {
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon src/index.ts",
+    "reseed": "prisma migrate reset && prisma db push && ts-node dbseeder.ts",
+    "studio": "prisma studio"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
