@@ -62,7 +62,7 @@ export const create = async (req: any, res: Response) => {
   const filesize = file.data.length;
   const ext = path.extname(file.name);
   const filename = file.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-  const url = `${process.env.PROTOCOL}://${process.env.HOST}/images/${filename}`;
+  const url = `${process.env.PROTOCOL}${process.env.HOST}/images/${filename}`;
 
   // Validasi File Type
   const allowedType = [".png", ".jpg", ".svg"];
@@ -126,7 +126,7 @@ export const update = async (req: any, res: Response) => {
     const filesize = newfile.data.length;
     const ext = path.extname(newfile.name);
     const filename = newfile.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-    const newurl = `${process.env.PROTOCOL}://${process.env.HOST}/images/${filename}`;
+    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/images/${filename}`;
     const allowedType = [".png", ".jpg", ".svg"];
 
     if (!allowedType.includes(ext.toLowerCase()))

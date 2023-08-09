@@ -77,6 +77,7 @@ async function seedDatabase() {
         tim: 34,
       },
     });
+
     await prisma.user.create({
       data: {
         name: "Muhammad Azfa",
