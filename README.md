@@ -2,14 +2,23 @@
 
 ## How To
 
-```shell
+```console
 pnpm dev install
 ```
 
 then :
 
-```shell
+```console
 pnpm firstrun
+```
+
+or manually
+`pnpm install` => `pnpm prisma db push` => `ts-node dbseeder.ts`
+
+## TO run after command above
+
+```console
+pnpm dev
 ```
 
 ## Endpoints
