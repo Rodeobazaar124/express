@@ -26,6 +26,7 @@
   },
   "scripts": {
     "dev": "nodemon src/index.ts",
+    "firstrun": "prisma db push && ts-node dbseeder.ts",
     "reseed": "prisma migrate reset && prisma db push && ts-node dbseeder.ts",
     "studio": "prisma studio"
   },

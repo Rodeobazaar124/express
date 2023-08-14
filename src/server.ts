@@ -17,15 +17,15 @@ export const app = express();
 
 export const PORT = process.env.PORT || 8000 || 3000;
 
-app.use(
-  cookieSession({
-    name: "session",
-    keys: ["cyberwolve"],
-    maxAge: 24 * 60 * 60 * 100,
-  })
-);
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(
+//   cookieSession({
+//     name: "session",
+//     keys: ["cyberwolve"],
+//     maxAge: 24 * 60 * 60 * 100,
+//   })
+// );
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 app.use(
   cors()
