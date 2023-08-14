@@ -30,7 +30,7 @@ model Testimony {
   username String
   location String
   comment  String @db.Text
-  star     Float
+  rating   Float
   avatar   String
 }
 

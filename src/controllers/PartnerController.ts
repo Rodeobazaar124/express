@@ -4,18 +4,18 @@ import moment from "moment";
 import fs from "fs";
 import { prismaClient } from "../core/database";
 import { IdValidation, validate } from "../validation/validation";
-import { TestimonyValidation } from "../validation/TestimonyValidation";
+import { stringify } from "querystring";
 
-const Testimony = prismaClient.testimony;
+const partner = prismaClient.partnership;
 
-export const get = async (req: Request, res: Response, next: NextFunction) => {
+export const get = async (req: any, res: Response, next: NextFunction) => {
   try {
     if (!req.params.id) {
-      const results = await Testimony.findMany();
+      const results = await partner.findMany();
       return res.status(200).json({ data: results });
     }
 
-    const result = await Testimony.findFirst({
+    const result = await partner.findFirst({
       where: {
         id: parseInt(req.params.id),
       },
@@ -33,36 +33,36 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const create = async (req: any, res: Response) => {
-  const valbody = validate(TestimonyValidation, req.body, res);
-  if (valbody === null) {
-    return;
+  if (!req.body.name) {
+    return res.status(400).json({ errors: "Field `name` must defined" });
   }
   // Validasi Data yang sudah ada
-  const TestimonyExist = await Testimony.count({
+  const ProductExist = await partner.count({
     where: {
-      username: { contains: valbody.title },
+      name: { contains: req.body.name },
     },
   });
-  if (TestimonyExist > 1)
-    return res.status(409).json({ error: "Product already exist" });
+  if (ProductExist > 1)
+    return res.status(409).json({ error: "Partner already exist" });
 
   if (req.files === null) {
     return res.status(400).json({
       error: {
-        code: "MISSING_AVATARS",
-        message: "Bad Request: An avatar file is required for this operation.",
+        code: "MISSING_IMAGE",
+        message: "Bad Request: An image file is required for this operation.",
         details:
-          "Please make sure to include a valid image file in the 'avatar' field.",
+          "Please make sure to include a valid image file in the 'image' field.",
       },
     });
   }
 
   // File Handler
-  const file = req.files.avatar;
+  const file = req.files.image;
   const filesize = file.data.length;
   const ext = path.extname(file.name);
-  const filename = file.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-  const url = `${process.env.PROTOCOL}${process.env.HOST}/avatars/${filename}`;
+  const filename =
+    req.body.name.replace(" ", "_") + moment().format("DDMMYYY-h_mm_ss") + ext;
+  const url = `${process.env.PROTOCOL}${process.env.HOST}/images/partner/${filename}`;
 
   // Validasi File Type
   const allowedType = [".png", ".jpg", ".svg"];
@@ -74,42 +74,40 @@ export const create = async (req: any, res: Response) => {
     return res.status(422).json({ message: `File too big` });
 
   // Menyimpan file
-  file.mv(`public/avatars/${filename}`, async (err: Error) => {
+  file.mv(`public/images/partner/${filename}`, async (err: Error) => {
     if (err) return res.status(500).json({ messages: `${err.message}` });
 
     // Menyimpan nama file beserta data
     try {
-      await Testimony.create({
+      await partner.create({
         data: {
-          username: valbody.username,
-          avatar: url,
-          rating: valbody.rating,
-          location: valbody.location,
-          comment: valbody.comment,
+          name: req.body.name,
+          image: url,
         },
       });
       res.status(200).json({ message: `Created successfully` });
     } catch (error) {
       res
         .status(500)
-        .json({ message: `Error adding new testimony: ${error.message}` });
+        .json({ message: `Error adding new partner: ${error.message}` });
     }
   });
 };
 
 export const update = async (req: any, res: Response) => {
   try {
-    const valbody = validate(TestimonyValidation, req.body, res);
-    if (valbody === null) {
-      return;
+    if (!req.body.name) {
+      return res.status(400).json({ errors: "Field `name` must defined" });
     }
 
     // Validate If data exist
-    const thatOne = await Testimony.findFirst({
+    const thatOnePartner = await partner.findFirst({
       where: { id: parseInt(req.params.id) },
     });
-    if (thatOne === null) {
-      return res.status(400).json({ error: `ID ${req.params.id} Not exist!` });
+    if (thatOnePartner === null) {
+      return res
+        .status(400)
+        .json({ error: `Partner ${req.params.id} Not exist!` });
     }
 
     // Validate files
@@ -117,15 +115,18 @@ export const update = async (req: any, res: Response) => {
     if (req.files == null)
       return res.status(400).json({
         error: true,
-        message: "avatar upload required",
-        details: "Image must be uploaded in the 'avatar' property",
+        message: "Image upload required",
+        details: "Image must be uploaded in the 'image' property",
       });
 
-    const newfile = req.files.avatar;
+    const newfile = req.files.image;
     const filesize = newfile.data.length;
     const ext = path.extname(newfile.name);
-    const filename = newfile.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/avatars/${filename}`;
+    const filename =
+      req.body.name.replace(" ", "_") +
+      moment().format("DDMMYYY-h_mm_ss") +
+      ext;
+    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/images/partner/${filename}`;
     const allowedType = [".png", ".jpg", ".svg"];
 
     if (!allowedType.includes(ext.toLowerCase()))
@@ -134,31 +135,28 @@ export const update = async (req: any, res: Response) => {
     if (filesize > 5000000)
       return res.status(422).json({ message: `File too big` });
 
-    newfile.mv(`public/avatars/${filename}`, async (err: Error) => {
+    newfile.mv(`public/images/partner/${filename}`, async (err: Error) => {
       if (err) return res.status(500).json({ messages: `Can't save file` });
     });
 
     // set the data
-    await Testimony.update({
+    await partner.update({
       data: {
-        username: valbody.username,
-        avatar: newurl,
-        rating: valbody.rating,
-        location: valbody.location,
-        comment: valbody.comment,
+        name: req.body.name,
+        image: newurl,
       },
       where: {
         id: parseInt(req.params.id),
       },
     });
 
-    const oldfile = thatOne.avatar.split("/");
+    const oldfile = thatOnePartner.image.split("/");
     const filename_fromdb = oldfile[oldfile.length - 1];
-    fs.unlink(`public/avatars/${filename_fromdb}`, (err) => {
+    fs.unlink(`public/images/partner/${filename_fromdb}`, (err) => {
       if (err) {
         console.log({
           error: err,
-          where: "update: Old File Remover",
+          where: "updateProduct->OldFileRemover",
         });
       }
     });
@@ -180,7 +178,7 @@ export const remove = async (req: any, res: Response) => {
     if (validatedIds === null) {
       return;
     }
-    const theProduct = await Testimony.findFirst({
+    const theProduct = await partner.findFirst({
       where: { id: validatedIds },
     });
 
@@ -190,16 +188,16 @@ export const remove = async (req: any, res: Response) => {
         .json({ error: `Data ${req.params.id} Not exist!` });
     }
 
-    await Testimony.delete({ where: { id: parseInt(req.params.id) } });
+    await partner.delete({ where: { id: parseInt(req.params.id) } });
 
     try {
-      const file = theProduct.avatar.split("/");
+      const file = theProduct.image.split("/");
       const filename = file[file.length - 1];
-      fs.unlink(`public/avatars/${filename}`, (err) => {
+      fs.unlink(`public/images/partner/${filename}`, (err) => {
         if (err) {
           console.log({
             error: err,
-            where: "Product: Remove: Old File Remover",
+            where: "Product: Remove->OldFileRemover",
           });
         }
       });

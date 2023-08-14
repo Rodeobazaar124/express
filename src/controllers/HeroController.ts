@@ -46,7 +46,7 @@ export const create = async (req: Request, res: Response) => {
   if (valbody === null) {
     return;
   }
-  switch (req.params.pos.toLowerCase()) {
+  switch (req.params.id.toLowerCase()) {
     case "left":
       valbody.position = "left";
       if (!valbody.hText || !valbody.desc) {

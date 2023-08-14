@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import { create, get, remove, update } from "../controllers/HeroController";
 // import { authMiddleware } from "../middleware/auth-middleware";
 
@@ -13,6 +13,11 @@ HeroRoutes.route("/:position/").get(get);
 
 // // CREATE
 HeroRoutes.post("/:id", create);
+HeroRoutes.post("/", (req: Request, res: Response) => {
+  return res.status(418).json({
+    message: "I'm a teapot! Please input ID in params",
+  });
+});
 
 // // UPDATE
 HeroRoutes.route("/:id").patch(update);

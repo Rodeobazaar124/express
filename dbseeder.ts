@@ -186,7 +186,7 @@ async function seedDatabase() {
 
     partnership[0].forEach(async (_, i) => {
       const name = partnership[0][i];
-      const image = partnership[0][i];
+      const image = partnership[1][i];
       await prisma.partnership.create({
         data: {
           name,
@@ -199,7 +199,7 @@ async function seedDatabase() {
       const username = testimony[0][i];
       const location = testimony[1][i];
       const comment = testimony[2][i];
-      const star = testimony[3][i];
+      const rating = testimony[3][i];
       const avatar = testimony[4][i];
 
       await prisma.testimony.create({
@@ -207,7 +207,7 @@ async function seedDatabase() {
           username: username.toString(), // Convert to string
           location: location.toString(), // Convert to string
           comment: comment.toString(), // Convert to string
-          star: parseFloat(star.toString()), // Convert to string and then parse
+          rating: parseFloat(rating.toString()), // Convert to string and then parse
           avatar: avatar.toString(), // Convert to string
         },
       });
