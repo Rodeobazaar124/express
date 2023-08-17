@@ -2,20 +2,20 @@ import express, { response } from "express";
 import { create, remove, get, update } from "../controllers/servicesController";
 // import { authMiddleware } from "../middleware/auth-middleware";
 
-const ProductsRoutes = express.Router();
-// ProductsRoutes.use(authMiddleware);
+const servicesRoutes = express.Router();
 
 // GET
-ProductsRoutes.route("/").get(get);
-ProductsRoutes.route("/:id").get(get);
+servicesRoutes.route("/").get(get);
+servicesRoutes.route("/:id").get(get);
 
 // CREATE
-ProductsRoutes.post("/", create);
+// servicesRoutes.use(authMiddleware);
+servicesRoutes.post("/", create);
 
-// UPDATE
-ProductsRoutes.route("/:id").put(update);
+// update
+servicesRoutes.route("/:id").patch(update);
 
 // DELETE
-ProductsRoutes.route("/:id").delete(remove);
+servicesRoutes.route("/:id").delete(remove);
 
-export default ProductsRoutes;
+export default servicesRoutes;

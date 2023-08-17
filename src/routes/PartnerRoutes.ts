@@ -13,7 +13,7 @@ PartnerRoutes.route("/:id").get(get);
 PartnerRoutes.post("/", create);
 
 // UPDATE
-PartnerRoutes.route("/:id").put(update);
+PartnerRoutes.route("/:id").patch(update);
 
 // DELETE
 PartnerRoutes.route("/:id").delete(remove);

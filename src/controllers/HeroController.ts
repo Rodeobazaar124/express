@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { prismaClient } from "../core/database";
 import { IdValidation, validate } from "../validation/validation";
 import { HeroValidation } from "../validation/HeroValidation";
 
 const hero = prismaClient.hero;
 
-export const get = async (req: Request, res: Response) => {
+export const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     //   getMany
     if (!req.params.id) {
@@ -29,19 +29,26 @@ export const get = async (req: Request, res: Response) => {
           const hasilId = await hero.findMany({
             where: { id: parsedId },
           });
+          if (hasilId === null) {
+            return res
+              .status(404)
+              .json({ errors: `Hero with ID ${parsedId} does not found` });
+          }
           return res.status(200).json({ data: hasilId });
         } else {
           return res.status(400).json({ error: "Invalid ID format" });
         }
     }
   } catch (error) {
-    return res.status(500).json({
-      message: `We're so sorry it's look like we have error on the server`,
-    });
+    return next(error);
   }
 };
 
-export const create = async (req: Request, res: Response) => {
+export const create = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const valbody = validate(HeroValidation, req.body, res);
   if (valbody === null) {
     return;
@@ -63,8 +70,7 @@ export const create = async (req: Request, res: Response) => {
           .status(201)
           .json({ message: "Hero created successfully", data: result });
       } catch (error) {
-        // Handle creation failure
-        return res.status(500).json({ error: "Something went wrong" });
+        next(error);
       }
 
     case "right":
@@ -82,14 +88,12 @@ export const create = async (req: Request, res: Response) => {
           .status(201)
           .json({ message: "Hero created successfully", data: result });
       } catch (error) {
-        return res.status(500).json({ error: "Something went wrong" });
+        next(error);
       }
 
     default:
       return res.status(400).json({ error: "Invalid position" });
   }
-
-  // Validate
 };
 
 export const update = async (req: Request, res: Response) => {
@@ -98,9 +102,7 @@ export const update = async (req: Request, res: Response) => {
   if (valbody === null) {
     return;
   }
-  if (valIds === null) {
-    return;
-  }
+  if (valIds === null) return;
 
   // Validate If data exist
   const theProduct = await hero.findFirst({
@@ -118,9 +120,7 @@ export const update = async (req: Request, res: Response) => {
 
 export const remove = async (req: Request, res: Response) => {
   const valIds = validate(IdValidation, req.params.id, res);
-  if (valIds === null) {
-    return;
-  }
+  if (valIds === null) return;
   const check = await hero.findFirst({ where: { id: valIds } });
   if (check === null) {
     return res.status(400).json({ error: `ID ${valIds} Not exist!` });

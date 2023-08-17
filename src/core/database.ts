@@ -20,21 +20,21 @@ export const prismaClient = new PrismaClient({
       level: "warn",
     },
   ],
-  errorFormat: "minimal",
+  errorFormat: "pretty",
 });
 
 prismaClient.$on("error", (e) => {
   logger.error(e);
 });
 
-prismaClient.$on("warn", (e) => {
-  logger.warn(e);
+prismaClient.$on("warn", (w) => {
+  logger.warn(w);
 });
 
-prismaClient.$on("info", (e) => {
-  logger.info(e);
+prismaClient.$on("info", (i) => {
+  logger.info(i);
 });
 
-prismaClient.$on("query", (e) => {
-  logger.info(e);
+prismaClient.$on("query", (q) => {
+  logger.info(q);
 });

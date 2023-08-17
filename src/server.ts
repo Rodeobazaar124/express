@@ -3,19 +3,13 @@ import express, { Request, Response, response } from "express";
 import cors from "cors";
 import fileupload from "express-fileupload";
 import path from "path";
-import ServicesRoutes from "./routes/ServicesRoutes";
-import ProductsRoutes from "./routes/ProductsRoutes";
-import HeroRoutes from "./routes/HeroRoutes";
-import TestimonyRoutes from "./routes/TestimonyRoutes";
-// import { errorMiddleware } from "./middleware/error-middleware";
-import cookieSession from "cookie-session";
-import passport from "passport";
 require("./core/passport");
-import AuthRouter from "./routes/AuthRoutes";
-import PartnerRoutes from "./routes/PartnerRoutes";
+// import AuthRouter from "./routes/AuthRoutes";
+import { errorMiddleware } from "./middleware/error-middleware";
+import Routes from "./routes/Routes";
 export const app = express();
 
-export const PORT = process.env.PORT || 8000 || 3000;
+export const PORT = process.env.PORT || 8080 || 3000;
 
 // app.use(
 //   cookieSession({
@@ -40,10 +34,9 @@ app.use(fileupload());
 app.use(express.static(path.join(__dirname, "../public")));
 
 // app.use("/Testimonies", TestimoniesRoutes);
-app.use("/auth", AuthRouter);
-app.use("/services", ServicesRoutes);
-app.use("/products", ProductsRoutes);
-app.use("/hero", HeroRoutes);
-app.use("/testimonies", TestimonyRoutes);
-app.use("/partner", PartnerRoutes);
-// app.use(errorMiddleware);
+app.use("/api", Routes);
+app.use(errorMiddleware);
+
+app.get("/*", (req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "views", "404.html"));
+});

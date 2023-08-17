@@ -15,7 +15,7 @@ HeroRoutes.route("/:position/").get(get);
 HeroRoutes.post("/:id", create);
 HeroRoutes.post("/", (req: Request, res: Response) => {
   return res.status(418).json({
-    message: "I'm a teapot! Please input ID in params",
+    message: "Please input ID or position ('left' or 'right') in params",
   });
 });
 

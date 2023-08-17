@@ -34,17 +34,12 @@ model Testimony {
   avatar   String
 }
 
-// enum Position {
-//   Left
-//   Right
-// }
-
 model Hero {
   id       Int     @id @default(autoincrement())
   number   Int?
   position String
   text     String
-  hText    String? @unique
+  hText    String?
   desc     String?
 }
 
