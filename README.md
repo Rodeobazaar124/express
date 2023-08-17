@@ -41,8 +41,8 @@ pnpm dev
 ### Partner
 
 ```
-/partner
-/partner/{id}
+/partners
+/partners/{id}
 ```
 
 ### Services
