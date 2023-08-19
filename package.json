@@ -19,7 +19,6 @@
     "moment": "^2.29.4",
     "passport": "0.5",
     "passport-google-oauth20": "^2.0.0",
-    "ts-node": "^10.9.1",
     "typescript": "^5.1.6",
     "winston": "^3.10.0"
   },
@@ -39,7 +38,9 @@
     "@types/node": "^20.4.5",
     "@types/passport": "^1.0.12",
     "@types/passport-google-oauth20": "^2.0.11",
+    "nodemon": "^3.0.1",
     "prettier": "^3.0.1",
-    "prisma": "^5.0.0"
+    "prisma": "^5.0.0",
+    "ts-node": "^10.9.1"
   }
 }

@@ -1,9 +1,9 @@
-import { app } from "./server";
-import { PORT } from "./server";
+import { app } from "./app/server";
+import { PORT } from "./app/server";
 import fs from "fs";
 import fsP from "fs/promises";
 import path from "path";
-import { logger } from "./core/logging";
+import { logger } from "./app/logging";
 
 try {
   if (!fs.existsSync(path.join(__dirname, "..", "public"))) {

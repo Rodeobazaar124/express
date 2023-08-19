@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { prismaClient } from "../core/database";
+import { prismaClient } from "../app/database";
 import { IdValidation, validate } from "../validation/validation";
 import { HeroValidation } from "../validation/HeroValidation";
 

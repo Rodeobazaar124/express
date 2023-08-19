@@ -1,12 +1,15 @@
 import "dotenv/config";
-import express, { Request, Response, response } from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import fileupload from "express-fileupload";
 import path from "path";
-require("./core/passport");
+require("./passport");
 // import AuthRouter from "./routes/AuthRoutes";
-import { errorMiddleware } from "./middleware/error-middleware";
-import Routes from "./routes/Routes";
+
+
+import { errorMiddleware } from "../middleware/error-middleware";
+import Routes from "../routes/public-api";
+import PrivateRoutes from "../routes/api";
 export const app = express();
 
 export const PORT = process.env.PORT || 8080 || 3000;
@@ -31,12 +34,13 @@ app.use(
 );
 app.use(express.json());
 app.use(fileupload());
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.static(path.join(__dirname, "..","..","public")));
 
 // app.use("/Testimonies", TestimoniesRoutes);
 app.use("/api", Routes);
+app.use("/api/private", PrivateRoutes);
 app.use(errorMiddleware);
 
 app.get("/*", (req, res) => {
-  res.status(404).sendFile(path.join(__dirname, "views", "404.html"));
+  res.status(404).sendFile(path.join(__dirname,  "..","views", "404.html"));
 });

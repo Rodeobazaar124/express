@@ -4,7 +4,7 @@ import moment from "moment";
 import fsP from "fs/promises";
 import fs from "fs";
 
-import { prismaClient } from "../core/database";
+import { prismaClient } from "../app/database";
 import { IdValidation, validate } from "../validation/validation";
 import { ProductBodyValidation } from "../validation/ProductValidation";
 

@@ -1,4 +1,4 @@
-import { logger } from "../core/logging";
+import { logger } from "../app/logging";
 import { ResponseError } from "../error/response-error";
 
 export const errorMiddleware = async (err, req, res, next) => {
