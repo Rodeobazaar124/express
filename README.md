@@ -26,8 +26,8 @@ pnpm dev
 ### Testimony
 
 ```
-/testimonies
-/testimonies/{id}
+/testimony
+/testimony/{id}
 ```
 
 ### Hero
@@ -48,13 +48,13 @@ pnpm dev
 ### Services
 
 ```
-/services
-/services/{id}
+/service
+/service/{id}
 ```
 
 ### Products
 
 ```
-/products
-/products/{id}
+/product
+/product/{id}
 ```
