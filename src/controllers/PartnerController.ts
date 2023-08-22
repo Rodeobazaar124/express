@@ -5,11 +5,11 @@ import moment from "moment";
 import fsP from "fs/promises";
 import fs from "fs";
 
-import { prismaClient } from "../app/database";
+import { db } from "../app/database";
 import { IdValidation, validate } from "../validation/validation";
-import { stringify } from "querystring";
 
-const partner = prismaClient.partnership;
+const partner = db.partnership;
+const name = "partners";
 
 export const get = async (req: any, res: Response, next: NextFunction) => {
   try {
@@ -66,7 +66,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
       req.body.name.replace(" ", "_") +
       moment().format("DDMMYYY-h_mm_ss") +
       ext;
-    const url = `${process.env.PROTOCOL}${process.env.HOST}/images/partner/${filename}`;
+    const url = `${process.env.PROTOCOL}${process.env.HOST}/images/${name}/${filename}`;
 
     // Validasi File Type
     const allowedType = [".png", ".jpg", ".svg"];
@@ -79,7 +79,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
 
     // Menyimpan file
     file.mv(
-      path.join(__dirname, "..", "..", "public", "images", "partners", filename)
+      path.join(__dirname, "..", "..", "public", "images", name, filename)
     );
     await partner.create({
       data: {
@@ -87,7 +87,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
         image: url,
       },
     });
-    res.status(200).json({ message: `Created successfully` });
+    res.status(201).json({ message: `Created successfully` });
   } catch (error) {
     next(error);
   }
@@ -125,7 +125,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
       req.body.name.replace(" ", "_") +
       moment().format("DDMMYYY-h_mm_ss") +
       ext;
-    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/images/partner/${filename}`;
+    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/images/${name}/${filename}`;
     const allowedType = [".png", ".jpg", ".svg"];
 
     if (!allowedType.includes(ext.toLowerCase()))
@@ -135,15 +135,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
       return res.status(422).json({ message: `File too big` });
 
     newfile.mv(
-      path.join(
-        __dirname,
-        "..",
-        "..",
-        "public",
-        "images",
-        "partners",
-        filename
-      ),
+      path.join(__dirname, "..", "..", "public", "images", name, filename),
       async (err: Error) => {
         if (err) return res.status(500).json({ messages: `Can't save file` });
       }

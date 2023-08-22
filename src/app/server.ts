@@ -3,9 +3,8 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import fileupload from "express-fileupload";
 import path from "path";
-require("./passport");
-// import AuthRouter from "./routes/AuthRoutes";
-
+// require("./passport");
+import { AuthRoutes } from "../routes/AuthRoutes";
 
 import { errorMiddleware } from "../middleware/error-middleware";
 import Routes from "../routes/public-api";
@@ -34,13 +33,14 @@ app.use(
 );
 app.use(express.json());
 app.use(fileupload());
-app.use(express.static(path.join(__dirname, "..","..","public")));
+app.use(express.static(path.join(__dirname, "..", "..", "public")));
 
 // app.use("/Testimonies", TestimoniesRoutes);
+app.use("/api", PrivateRoutes);
 app.use("/api", Routes);
-app.use("/api/private", PrivateRoutes);
+app.use("/api/auth", AuthRoutes);
 app.use(errorMiddleware);
 
 app.get("/*", (req, res) => {
-  res.status(404).sendFile(path.join(__dirname,  "..","views", "404.html"));
+  res.status(404).sendFile(path.join(__dirname, "..", "views", "404.html"));
 });

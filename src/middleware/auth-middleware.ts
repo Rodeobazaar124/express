@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { prismaClient } from "../app/database";
+import { db } from "../app/database";
 
 interface authenticatedUser extends Request {
   user: any;
@@ -19,7 +19,7 @@ export const authMiddleware = async (
       })
       .end();
   } else {
-    const user = await prismaClient.user.findFirst({
+    const user = await db.user.findFirst({
       where: {
         token: token,
       },

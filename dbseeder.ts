@@ -86,6 +86,9 @@ async function seedDatabase() {
         avatar:
           "https://lh3.googleusercontent.com/ogw/AGvuzYaJeui6GgKwfaEyE8GJaRKwWYFB-JiVjRQp_xjhMQ=s400-c-mo",
         job: "Admin",
+        token: "asdasdasdas",
+        email: "random3@random.com",
+        password: "test",
       },
     });
     await prisma.user.create({
@@ -95,6 +98,9 @@ async function seedDatabase() {
         avatar:
           "https://lh3.googleusercontent.com/ogw/AGvuzYaJeui6GgKwfaEyE8GJaRKwWYFB-JiVjRQp_xjhMQ=s400-c-mo",
         job: "UI UX",
+        token: "asdasdasdas",
+        email: "random2@random.com",
+        password: "test",
       },
     });
     await prisma.user.create({
@@ -104,6 +110,9 @@ async function seedDatabase() {
         avatar:
           "https://lh3.googleusercontent.com/ogw/AGvuzYaJeui6GgKwfaEyE8GJaRKwWYFB-JiVjRQp_xjhMQ=s400-c-mo",
         job: "Frontend",
+        token: "asdasdasdas",
+        email: "random1@random.com",
+        password: "test",
       },
     });
 

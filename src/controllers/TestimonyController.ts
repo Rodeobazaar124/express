@@ -3,11 +3,12 @@ import path from "path";
 import moment from "moment";
 import fsP from "fs/promises";
 import fs from "fs";
-import { prismaClient } from "../app/database";
+import { db } from "../app/database";
 import { IdValidation, validate } from "../validation/validation";
 import { TestimonyValidation } from "../validation/TestimonyValidation";
 
-const Testimony = prismaClient.testimony;
+const Testimony = db.testimony;
+const dirname = "avatars";
 
 export const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -61,7 +62,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
   const filesize = file.data.length;
   const ext = path.extname(file.name);
   const filename = file.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-  const url = `${process.env.PROTOCOL}${process.env.HOST}/avatars/${filename}`;
+  const url = `${process.env.PROTOCOL}${process.env.HOST}/${dirname}/${filename}`;
 
   // Validasi File Type
   const allowedType = [".png", ".jpg", ".svg"];
@@ -89,7 +90,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
             comment: valbody.comment,
           },
         });
-        res.status(200).json({ message: `Created successfully` });
+        res.status(201).json({ message: `Created successfully` });
       } catch (e) {
         next(e);
       }
@@ -125,7 +126,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
     const filesize = newfile.data.length;
     const ext = path.extname(newfile.name);
     const filename = newfile.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/avatars/${filename}`;
+    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/${dirname}/${filename}`;
     const allowedType = [".png", ".jpg", ".svg"];
 
     if (!allowedType.includes(ext.toLowerCase()))
@@ -135,7 +136,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
       return res.status(422).json({ message: `File too big` });
 
     newfile.mv(
-      path.join(__dirname, "..", "..", "public", "images", "avatars", filename)
+      path.join(__dirname, "..", "..", "public", "images", dirname, filename)
     );
 
     // set the data

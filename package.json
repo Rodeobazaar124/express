@@ -5,7 +5,7 @@
   "author": "Rodeobazaar124 <azfasa15@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@prisma/client": "^5.0.0",
+    "@prisma/client": "^5.1.1",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "cookie-session": "^2.0.0",
@@ -20,6 +20,7 @@
     "passport": "0.5",
     "passport-google-oauth20": "^2.0.0",
     "typescript": "^5.1.6",
+    "uuid": "^9.0.0",
     "winston": "^3.10.0"
   },
   "scripts": {
@@ -38,6 +39,7 @@
     "@types/node": "^20.4.5",
     "@types/passport": "^1.0.12",
     "@types/passport-google-oauth20": "^2.0.11",
+    "@types/uuid": "^9.0.2",
     "nodemon": "^3.0.1",
     "prettier": "^3.0.1",
     "prisma": "^5.0.0",

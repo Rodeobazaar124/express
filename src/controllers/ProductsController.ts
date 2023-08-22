@@ -4,11 +4,12 @@ import moment from "moment";
 import fsP from "fs/promises";
 import fs from "fs";
 
-import { prismaClient } from "../app/database";
+import { db } from "../app/database";
 import { IdValidation, validate } from "../validation/validation";
 import { ProductBodyValidation } from "../validation/ProductValidation";
 
-const product = prismaClient.product;
+const product = db.product;
+const name = "products";
 
 export const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -63,7 +64,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
   const filesize = file.data.length;
   const ext = path.extname(file.name);
   const filename = file.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-  const url = `${process.env.PROTOCOL}${process.env.HOST}/images/${filename}`;
+  const url = `${process.env.PROTOCOL}${process.env.HOST}/images/${name}/${filename}`;
 
   // Validasi File Type
   const allowedType = [".png", ".jpg", ".svg"];
@@ -76,7 +77,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
 
   // Menyimpan file
   file.mv(
-    path.join(__dirname, "..", "..", "public", "images", "products", filename),
+    path.join(__dirname, "..", "..", "public", "images", name, filename),
     async (err: Error) => {
       if (err) return res.status(500).json({ messages: `${err.message}` });
 
@@ -89,7 +90,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
             desc: req.body.desc,
           },
         });
-        res.status(200).json({ message: `Product created successfully` });
+        res.status(201).json({ message: `Product created successfully` });
       } catch (e) {
         next(e);
       }
@@ -127,7 +128,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
     const filesize = newfile.data.length;
     const ext = path.extname(newfile.name);
     const filename = newfile.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/images/${filename}`;
+    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/images/${name}/${filename}`;
     const allowedType = [".png", ".jpg", ".svg"];
 
     if (!allowedType.includes(ext.toLowerCase()))
@@ -137,15 +138,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
       return res.status(422).json({ message: `File too big` });
 
     newfile.mv(
-      path.join(
-        __dirname,
-        "..",
-        "..",
-        "public",
-        "images",
-        "products",
-        filename
-      ),
+      path.join(__dirname, "..", "..", "public", "images", name, filename),
       async (err: Error) => {
         if (err) return res.status(500).json({ messages: `Can't save file` });
       }

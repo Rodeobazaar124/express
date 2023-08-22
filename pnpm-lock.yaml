@@ -6,7 +6,7 @@ settings:
 
 dependencies:
   '@prisma/client':
-    specifier: ^5.0.0
+    specifier: ^5.1.1
     version: 5.1.1(prisma@5.1.1)
   bcrypt:
     specifier: ^5.1.0
@@ -50,6 +50,9 @@ dependencies:
   typescript:
     specifier: ^5.1.6
     version: 5.1.6
+  uuid:
+    specifier: ^9.0.0
+    version: 9.0.0
   winston:
     specifier: ^3.10.0
     version: 3.10.0
@@ -82,6 +85,9 @@ devDependencies:
   '@types/passport-google-oauth20':
     specifier: ^2.0.11
     version: 2.0.11
+  '@types/uuid':
+    specifier: ^9.0.2
+    version: 9.0.2
   nodemon:
     specifier: ^3.0.1
     version: 3.0.1
@@ -590,6 +596,10 @@ packages:
   /@types/triple-beam@1.3.2:
     resolution: {integrity: sha512-txGIh+0eDFzKGC25zORnswy+br1Ha7hj5cMVwKIU7+s0U2AxxJru/jZSMU6OC9MJWP6+pc/hc6ZjyZShpsyY2g==}
     dev: false
+
+  /@types/uuid@9.0.2:
+    resolution: {integrity: sha512-kNnC1GFBLuhImSnV7w4njQkUiJi0ZXUycu1rUaouPqiKlXkh77JKgdRnTAp1x5eBwcIwbtI+3otwzuIDEuDoxQ==}
+    dev: true
 
   /abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -1986,6 +1996,11 @@ packages:
   /utils-merge@1.0.1:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
+    dev: false
+
+  /uuid@9.0.0:
+    resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
+    hasBin: true
     dev: false
 
   /v8-compile-cache-lib@3.0.1:

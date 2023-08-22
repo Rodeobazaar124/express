@@ -1,16 +1,22 @@
 import { NextFunction, Request, Response } from "express";
-import { prismaClient } from "../app/database";
+import { db } from "../app/database";
 import { IdValidation, validate } from "../validation/validation";
 import { HeroValidation } from "../validation/HeroValidation";
 
-const hero = prismaClient.hero;
+const hero = db.hero;
 
 export const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     //   getMany
     if (!req.params.id) {
-      const hasil = await hero.findMany();
-      return res.status(200).json({ data: hasil });
+      const left = await hero.findMany({ where: { position: "Left" } });
+      const right = await hero.findMany({ where: { position: "Right" } });
+      return res.status(200).json({
+        data: {
+          left,
+          right,
+        },
+      });
     }
     switch (req.params.id.toLowerCase()) {
       case "left":

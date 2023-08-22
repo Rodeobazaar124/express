@@ -5,33 +5,20 @@ import fsP from "fs/promises";
 import path from "path";
 import { logger } from "./app/logging";
 
+export const checkOrCreateFolder = function (folder: string | any) {
+  if (!fs.existsSync(folder)) {
+    fsP.mkdir(path.join(folder));
+  }
+};
 try {
-  if (!fs.existsSync(path.join(__dirname, "..", "public"))) {
-    fsP.mkdir(path.join(__dirname, "..", "public"));
-  }
-  if (!fs.existsSync(path.join(__dirname, "..", "public", "images"))) {
-    fsP.mkdir(path.join(__dirname, "..", "public", "images"));
-  }
-  if (
-    !fs.existsSync(path.join(__dirname, "..", "public", "images", "avatars"))
-  ) {
-    fsP.mkdir(path.join(__dirname, "..", "public", "images", "avatars"));
-  }
-  if (
-    !fs.existsSync(path.join(__dirname, "..", "public", "images", "partners"))
-  ) {
-    fsP.mkdir(path.join(__dirname, "..", "public", "images", "partners"));
-  }
-  if (
-    !fs.existsSync(path.join(__dirname, "..", "public", "images", "products"))
-  ) {
-    fsP.mkdir(path.join(__dirname, "..", "public", "images", "products"));
-  }
-  if (
-    !fs.existsSync(path.join(__dirname, "..", "public", "images", "services"))
-  ) {
-    fsP.mkdir(path.join(__dirname, "..", "public", "images", "services"));
-  }
+  const publicdir = path.join(__dirname, "..", "public");
+  checkOrCreateFolder(publicdir);
+  checkOrCreateFolder(path.join(publicdir, "images"));
+  checkOrCreateFolder(path.join(publicdir, "images", "avatars"));
+  checkOrCreateFolder(path.join(publicdir, "images", "partners"));
+  checkOrCreateFolder(path.join(publicdir, "images", "products"));
+  checkOrCreateFolder(path.join(publicdir, "images", "services"));
+  checkOrCreateFolder(path.join(publicdir, "images", "portofolios"));
 } catch (error) {
   logger.error(error);
 }
