@@ -11,25 +11,28 @@ datasource db {
 }
 
 model Product {
-  id    Int    @id @default(autoincrement())
-  title String @unique
-  desc  String @db.Text
-  image String
+  id       Int    @id @default(autoincrement())
+  title    String @unique
+  desc     String @db.Text
+  image    String
+  filename String
 }
 
 model Portofolio {
-  id    Int    @id @default(autoincrement())
-  title String
-  desc  String @db.Text
-  image String
+  id       Int    @id @default(autoincrement())
+  title    String
+  desc     String @db.Text
+  image    String
+  filename String
 }
 
 model Service {
-  id    Int     @id @default(autoincrement())
-  title String
-  desc  String? @db.Text
-  link  String
-  logo  String
+  id       Int     @id @default(autoincrement())
+  title    String
+  desc     String? @db.Text
+  link     String
+  logo     String
+  filename String
 }
 
 model Testimony {
@@ -39,6 +42,7 @@ model Testimony {
   comment  String @db.Text
   rating   Float
   avatar   String
+  filename String
 }
 
 model Hero {
@@ -66,9 +70,10 @@ model User {
 }
 
 model Partnership {
-  id    Int     @id @default(autoincrement())
-  name  String?
-  image String
+  id       Int     @id @default(autoincrement())
+  name     String?
+  image    String
+  filename String
 }
 
 model noiu_in_number {

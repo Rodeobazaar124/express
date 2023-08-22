@@ -88,6 +88,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
             rating: valbody.rating,
             location: valbody.location,
             comment: valbody.comment,
+            filename: filename,
           },
         });
         res.status(201).json({ message: `Created successfully` });
@@ -153,16 +154,14 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
       },
     });
 
-    const oldfile = thatOne.avatar.split("/");
-    const filename_fromdb = oldfile[oldfile.length - 1];
     const filepath = path.join(
       __dirname,
       "..",
       "..",
       "public",
       "images",
-      "avatars",
-      filename_fromdb
+      dirname,
+      thatOne.filename
     );
     if (fs.existsSync(filepath)) {
       await fsP.unlink(filepath);
@@ -203,8 +202,8 @@ export const remove = async (req: any, res: Response, next: NextFunction) => {
       "..",
       "public",
       "images",
-      "avatars",
-      filename
+      dirname,
+      theTestimony.filename
     );
     if (fs.existsSync(filepath)) {
       await fsP.unlink(filepath);

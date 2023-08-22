@@ -87,6 +87,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
             logo: url,
             desc: req.body.desc,
             link: req.body.link,
+            filename: filename,
           },
         });
         res.status(201).json({ message: `Created successfully` });
@@ -151,15 +152,14 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
       where: { id: parseInt(req.params.id) },
     });
 
-    const oldfile = theServices.logo.split("/");
-    const filename_fromdb = oldfile[oldfile.length - 1];
+    const filename_fromdb = theServices.filename;
     const filepath = path.join(
       __dirname,
       "..",
       "..",
       "public",
       "images",
-      "services",
+      dirname,
       filename_fromdb
     );
     if (fs.existsSync(filepath)) {
@@ -190,15 +190,14 @@ export const remove = async (req: any, res: Response, next: NextFunction) => {
 
     await service.delete({ where: { id: parseInt(req.params.id) } });
 
-    const file = Service.logo.split("/");
-    const filename = file[file.length - 1];
+    const filename = Service.filename;
     const filepath = path.join(
       __dirname,
       "..",
       "..",
       "public",
       "images",
-      "services",
+      dirname,
       filename
     );
     if (fs.existsSync(filepath)) {

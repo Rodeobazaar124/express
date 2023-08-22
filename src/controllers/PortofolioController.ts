@@ -86,6 +86,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
             title: req.body.title,
             image: url,
             desc: req.body.desc,
+            filename: filename,
           },
         });
         res.status(201).json({ message: `portofolio created successfully` });
@@ -154,17 +155,18 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
       },
     });
 
-    const oldfile = theportofolio.image.split("/");
-    const filename_fromdb = oldfile[oldfile.length - 1];
+    const filename_fromdb = theportofolio.filename;
     const filepath = path.join(
       __dirname,
       "..",
       "..",
       "public",
       "images",
-      "portofolio",
+      name,
       filename_fromdb
     );
+    console.log(`\n\n\n  ${filepath}  \n\n\n`);
+
     if (fs.existsSync(filepath)) {
       await fsP.unlink(filepath);
     }
@@ -193,16 +195,14 @@ export const remove = async (req: any, res: Response, next: NextFunction) => {
     }
 
     await portofolio.delete({ where: { id: parseInt(req.params.id) } });
-
-    const file = theportofolio.image.split("/");
-    const filename = file[file.length - 1];
+    const filename = theportofolio.filename;
     const filepath = path.join(
       __dirname,
       "..",
       "..",
       "public",
       "images",
-      "portofolio",
+      name,
       filename
     );
     if (fs.existsSync(filepath)) {

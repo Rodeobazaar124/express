@@ -88,6 +88,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
             title: req.body.title,
             image: url,
             desc: req.body.desc,
+            filename: filename,
           },
         });
         res.status(201).json({ message: `Product created successfully` });
@@ -156,15 +157,14 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
       },
     });
 
-    const oldfile = theProduct.image.split("/");
-    const filename_fromdb = oldfile[oldfile.length - 1];
+    const filename_fromdb = theProduct.filename;
     const filepath = path.join(
       __dirname,
       "..",
       "..",
       "public",
       "images",
-      "products",
+      name,
       filename_fromdb
     );
     if (fs.existsSync(filepath)) {
@@ -196,15 +196,14 @@ export const remove = async (req: any, res: Response, next: NextFunction) => {
 
     await product.delete({ where: { id: parseInt(req.params.id) } });
 
-    const file = theProduct.image.split("/");
-    const filename = file[file.length - 1];
+    const filename = theProduct.filename;
     const filepath = path.join(
       __dirname,
       "..",
       "..",
       "public",
       "images",
-      "products",
+      name,
       filename
     );
     if (fs.existsSync(filepath)) {
