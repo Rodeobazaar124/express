@@ -23,7 +23,7 @@
     "winston": "^3.10.0"
   },
   "scripts": {
-    "vercel-build": "echo hello",
+    "vercel-build": "prisma generate",
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "firstrun": "prisma db push && ts-node dbseeder.ts",
