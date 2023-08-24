@@ -3,5 +3,5 @@ node_modules/
 public/
 yarn-error.log
 yarn.lock
-public/
 pnpm-lock.yaml
+.vercel
