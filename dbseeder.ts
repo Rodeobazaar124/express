@@ -32,15 +32,10 @@ async function seedDatabase() {
 
     const leftText = "Together We Make";
     const leftDesc = "Digital Product & Experiences.";
-    const HighlightedText: String[] = [
-      "Happy",
-      "Inovative",
-      "Distruptive",
-      "Magic",
-    ];
+    const HighlightedText: any = ["Happy", "Inovative", "Distruptive", "Magic"];
 
     await Promise.all(
-      HighlightedText.map((ht: string) =>
+      HighlightedText.map((ht) =>
         prisma.hero.create({
           data: {
             position: "Left",
@@ -156,6 +151,7 @@ async function seedDatabase() {
           desc,
           link,
           logo,
+          filename: "apawe.jpg",
         },
       });
     });
@@ -200,6 +196,7 @@ async function seedDatabase() {
         data: {
           name,
           image,
+          filename: "nganu.png",
         },
       });
     });
@@ -218,6 +215,7 @@ async function seedDatabase() {
           comment: comment.toString(), // Convert to string
           rating: parseFloat(rating.toString()), // Convert to string and then parse
           avatar: avatar.toString(), // Convert to string
+          filename: "nganu.png", // Convert to string
         },
       });
     });

@@ -16,7 +16,7 @@ model Product {
   title    String @unique
   desc     String @db.Text
   image    String
-  filename String
+  filename String @default("test.png")
 }
 
 model Portofolio {
