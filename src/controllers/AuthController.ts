@@ -1,6 +1,5 @@
 import { db } from "../app/database";
-import { hashToken } from "../app/hashToken";
-
+import { hashToken } from "../app/jwt";
 export const addRefreshTokenToWhitelist = function ({
   jti,
   refreshToken,

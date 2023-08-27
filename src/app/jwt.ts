@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import jwt from 'jsonwebtoken'
 
 
@@ -22,3 +23,8 @@ export const generateTokens = function (user, jti){
         refreshToken
     }
 }
+
+
+export const hashToken = function (token: string) {
+  return crypto.createHash("sha512").update(token).digest("hex");
+};

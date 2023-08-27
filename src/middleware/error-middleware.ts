@@ -1,23 +1,30 @@
+import { NextFunction, Response } from "express";
 import { logger } from "../app/logging";
-import { ResponseError } from "../error/response-error";
 
-export const errorMiddleware = async (err, req, res, next) => {
+export const errorMiddleware = async (
+  err: any,
+  req: Request | any,
+  res: Response | any,
+  next: NextFunction | any
+) => {
   if (!err) {
     next();
     return;
   }
 
-  if (err instanceof ResponseError) {
+  if (err.status) {
+    const status = err.status;
     res
-      .status(err.status)
+      .status(status)
       .json({
         errors: err.message,
       })
       .end();
   } else {
-    logger.error(`\n ${err} \n`);
+    const status = 500;
+    logger.error(err.message);
     res
-      .status(500)
+      .status(status)
       .json({
         errors: err.message,
       })

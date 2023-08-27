@@ -4,13 +4,12 @@ const prisma = new PrismaClient();
 
 async function seedDatabase() {
   try {
-    console.log("Running");
-
     await prisma.product.create({
       data: {
         title: "PSC 199",
         desc: "Aplikasi manajemen untuk monitoring petugas PCS dan terintegrasi dengan Whatsapp",
         image: "https://gdrive.azfasa15.workers.dev/psc199.png",
+        filename: "psc199.png",
       },
     });
 
@@ -19,6 +18,7 @@ async function seedDatabase() {
         title: "E-office",
         desc: "Aplikasi untuk monitoring dan absensi ASN",
         image: "https://gdrive.azfasa15.workers.dev/E-OFFICE.png",
+        filename: "E-OFFICE.png",
       },
     });
 
@@ -27,20 +27,16 @@ async function seedDatabase() {
         title: "SIMRS",
         desc: "Aplikasi manajemen untuk monitoring petugas RS dan terintegrasi dengan Whatsapp",
         image: "https://gdrive.azfasa15.workers.dev/simrs.png",
+        filename: "simrs.png",
       },
     });
 
     const leftText = "Together We Make";
     const leftDesc = "Digital Product & Experiences.";
-    const HighlightedText: String[] = [
-      "Happy",
-      "Inovative",
-      "Distruptive",
-      "Magic",
-    ];
+    const HighlightedText = ["Happy", "Inovative", "Distruptive", "Magic"];
 
     await Promise.all(
-      HighlightedText.map((ht: string) =>
+      HighlightedText.map((ht) =>
         prisma.hero.create({
           data: {
             position: "Left",
@@ -52,14 +48,14 @@ async function seedDatabase() {
       )
     );
 
-    const Text: string[] = [
+    const Text = [
       "Between your business objectives and what your customers want.",
       "Between your business objectives and what your client want.",
       "Between your smth.",
       "Hmm",
     ];
     await Promise.all(
-      Text.map(async (lt: string, i: number) =>
+      Text.map(async (lt, i) =>
         prisma.hero.create({
           data: {
             position: "Right",
@@ -156,6 +152,7 @@ async function seedDatabase() {
           desc,
           link,
           logo,
+          filename: "dummy.png",
         },
       });
     });
@@ -170,9 +167,9 @@ async function seedDatabase() {
       ],
       [4.5, 4.6, 4.5],
       [
-        "https://avatars.githubusercontent.com/u/59044693",
-        "https://avatars.githubusercontent.com/u/122725316",
-        "https://avatars.githubusercontent.com/u/114562205",
+        "https://github.com/Rodeobazaar124.png",
+        "https://github.com/xylviet.png",
+        "https://github.com/hafizhaekall.png",
       ],
     ];
 
@@ -200,6 +197,7 @@ async function seedDatabase() {
         data: {
           name,
           image,
+          filename: "fill.png",
         },
       });
     });
@@ -213,11 +211,12 @@ async function seedDatabase() {
 
       await prisma.testimony.create({
         data: {
-          username: username.toString(), // Convert to string
-          location: location.toString(), // Convert to string
-          comment: comment.toString(), // Convert to string
-          rating: parseFloat(rating.toString()), // Convert to string and then parse
-          avatar: avatar.toString(), // Convert to string
+          username: username.toString(),
+          location: location.toString(),
+          comment: comment.toString(),
+          rating: parseFloat(rating.toString()),
+          avatar: avatar.toString(),
+          filename: "dump.png",
         },
       });
     });

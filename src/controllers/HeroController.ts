@@ -8,17 +8,13 @@ const hero = db.hero;
 export const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     //   getMany
-    if (!req.params.id) {
-      const left = await hero.findMany({ where: { position: "Left" } });
-      const right = await hero.findMany({ where: { position: "Right" } });
+    if (!req.params["id"]) {
+      const result = await hero.findMany();
       return res.status(200).json({
-        data: {
-          left,
-          right,
-        },
+        data: result,
       });
     }
-    switch (req.params.id.toLowerCase()) {
+    switch (req.params["id"].toLowerCase()) {
       case "left":
         const hasilLeft = await hero.findMany({
           where: { position: "Left" },
@@ -30,7 +26,7 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
         });
         return res.status(200).json({ data: hasilRight });
       default:
-        const parsedId = parseInt(req.params.id);
+        const parsedId = parseInt(req.params["id"]);
         if (!isNaN(parsedId)) {
           const hasilId = await hero.findMany({
             where: { id: parsedId },
@@ -55,11 +51,8 @@ export const create = async (
   res: Response,
   next: NextFunction
 ) => {
-  const valbody = validate(HeroValidation, req.body, res);
-  if (valbody === null) {
-    return;
-  }
-  switch (req.params.id.toLowerCase()) {
+  const valbody = validate(HeroValidation, req.body);
+  switch (req.params["id"].toLowerCase()) {
     case "left":
       valbody.position = "left";
       if (!valbody.hText || !valbody.desc) {
@@ -103,19 +96,17 @@ export const create = async (
 };
 
 export const update = async (req: Request, res: Response) => {
-  const valbody = validate(HeroValidation, req.body, res);
-  const valIds = validate(IdValidation, req.params.id, res);
-  if (valbody === null) {
-    return;
-  }
-  if (valIds === null) return;
+  const valbody = validate(HeroValidation, req.body);
+  const valIds = validate(IdValidation, req.params["id"]);
 
   // Validate If data exist
   const theProduct = await hero.findFirst({
-    where: { id: parseInt(req.params.id) },
+    where: { id: parseInt(req.params["id"]) },
   });
   if (theProduct === null) {
-    return res.status(400).json({ error: `Data ${req.params.id} Not exist!` });
+    return res
+      .status(400)
+      .json({ error: `Data ${req.params["id"]} Not exist!` });
   }
   const result = await hero.update({
     where: { id: parseInt(valIds) },
@@ -125,8 +116,7 @@ export const update = async (req: Request, res: Response) => {
 };
 
 export const remove = async (req: Request, res: Response) => {
-  const valIds = validate(IdValidation, req.params.id, res);
-  if (valIds === null) return;
+  const valIds = validate(IdValidation, req.params["id"]);
   const check = await hero.findFirst({ where: { id: valIds } });
   if (check === null) {
     return res.status(400).json({ error: `ID ${valIds} Not exist!` });

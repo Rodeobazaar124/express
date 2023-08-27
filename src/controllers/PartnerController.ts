@@ -1,26 +1,22 @@
 import { NextFunction, Request, Response } from "express";
-import path from "path";
-import moment from "moment";
-
-import fsP from "fs/promises";
-import fs from "fs";
-
 import { db } from "../app/database";
 import { IdValidation, validate } from "../validation/validation";
-
+import { handleFile, removeFile } from "../middleware/files-middleware";
+import { ResponseError } from "../error/response-error";
+import { PartnerValidation } from "../validation/PartnerValidation";
 const partner = db.partnership;
-const name = "partners";
 
 export const get = async (req: any, res: Response, next: NextFunction) => {
   try {
-    if (!req.params.id) {
+    if (!req.params["id"]) {
       const results = await partner.findMany();
       return res.status(200).json({ data: results });
     }
+    await validate(IdValidation, req.params["id"]);
 
     const result = await partner.findFirst({
       where: {
-        id: parseInt(req.params.id),
+        id: parseInt(req.params["id"]),
       },
     });
 
@@ -35,52 +31,15 @@ export const get = async (req: any, res: Response, next: NextFunction) => {
 
 export const create = async (req: any, res: Response, next: NextFunction) => {
   try {
-    if (!req.body.name) {
-      return res.status(400).json({ errors: "Field `name` must defined" });
-    }
-    // Validasi Data yang sudah ada
-    const ProductExist = await partner.count({
+    await validate(PartnerValidation, req.body);
+    const partnerExist = await partner.count({
       where: {
-        name: { contains: req.body.name },
+        name: req.body.name,
       },
     });
-    if (ProductExist > 1)
-      return res.status(409).json({ error: "Partner already exist" });
-
-    if (req.files === null) {
-      return res.status(400).json({
-        error: {
-          code: "MISSING_IMAGE",
-          message: "Bad Request: An image file is required for this operation.",
-          details:
-            "Please make sure to include a valid image file in the 'image' field.",
-        },
-      });
-    }
-
-    // File Handler
-    const file = req.files.image;
-    const filesize = file.data.length;
-    const ext = path.extname(file.name);
-    const filename =
-      req.body.name.replace(" ", "_") +
-      moment().format("DDMMYYY-h_mm_ss") +
-      ext;
-    const url = `${process.env.PROTOCOL}${process.env.HOST}/images/${name}/${filename}`;
-
-    // Validasi File Type
-    const allowedType = [".png", ".jpg", ".svg"];
-    if (!allowedType.includes(ext.toLowerCase()))
-      return res.status(422).json({ message: `File Type Unsupported` });
-
-    // Validasi ukuran file
-    if (filesize > 5000000)
-      return res.status(422).json({ message: `File too big` });
-
-    // Menyimpan file
-    file.mv(
-      path.join(__dirname, "..", "..", "public", "images", name, filename)
-    );
+    if (partnerExist >= 1)
+      throw new ResponseError(409, `Partner ${req.body.name} already exist`);
+    const { filename, url } = handleFile(req, "image");
     await partner.create({
       data: {
         name: req.body.name,
@@ -96,76 +55,30 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
 
 export const update = async (req: any, res: Response, next: NextFunction) => {
   try {
-    if (!req.body.name) {
-      return res.status(400).json({ errors: "Field `name` must defined" });
-    }
+    await validate(IdValidation, req.params["id"]);
+    await validate(PartnerValidation, req.body);
 
-    // Validate If data exist
     const thatOnePartner = await partner.findFirst({
-      where: { id: parseInt(req.params.id) },
+      where: { id: parseInt(req.params["id"]) },
     });
     if (thatOnePartner === null) {
-      return res
-        .status(400)
-        .json({ error: `Partner ${req.params.id} Not exist!` });
+      throw new ResponseError(400, `Partner ${req.params["id"]} Not exist!`);
     }
 
-    // Validate files
-
-    if (req.files === null)
-      return res.status(400).json({
-        error: true,
-        message: "Image upload required",
-        details: "Image must be uploaded in the 'image' property",
-      });
-
-    const newfile = req.files.image;
-    const filesize = newfile.data.length;
-    const ext = path.extname(newfile.name);
-    const filename =
-      req.body.name.replace(" ", "_") +
-      moment().format("DDMMYYY-h_mm_ss") +
-      ext;
-    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/images/${name}/${filename}`;
-    const allowedType = [".png", ".jpg", ".svg"];
-
-    if (!allowedType.includes(ext.toLowerCase()))
-      return res.status(422).json({ message: `File Type Unsupported` });
-
-    if (filesize > 5000000)
-      return res.status(422).json({ message: `File too big` });
-
-    newfile.mv(
-      path.join(__dirname, "..", "..", "public", "images", name, filename),
-      async (err: Error) => {
-        if (err) return res.status(500).json({ messages: `Can't save file` });
-      }
-    );
+    const { filename: newname, url: newurl } = handleFile(req, "image");
 
     // set the data
     await partner.update({
       data: {
         name: req.body.name,
         image: newurl,
+        filename: newname,
       },
       where: {
-        id: parseInt(req.params.id),
+        id: parseInt(req.params["id"]),
       },
     });
-
-    const filename_fromdb = thatOnePartner.filename;
-    const filepath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "public",
-      "images",
-      name,
-      filename_fromdb
-    );
-    if (fs.existsSync(filepath)) {
-      await fsP.unlink(filepath);
-    }
+    removeFile(thatOnePartner);
 
     return res.status(200).json({ message: "Data Updated Succesfully" });
   } catch (error) {
@@ -175,39 +88,19 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
 
 export const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const validatedIds = validate(IdValidation, req.params.id, res);
-    if (validatedIds === null) {
-      return;
-    }
-    if (validatedIds === null) {
-      return;
-    }
+    const valId = validate(IdValidation, req.params["id"]);
     const thatOneParner = await partner.findFirst({
-      where: { id: validatedIds },
+      where: { id: valId },
     });
 
     if (thatOneParner === null) {
       return res
         .status(400)
-        .json({ error: `Data ${req.params.id} Not exist!` });
+        .json({ error: `Data ${req.params["id"]} Not exist!` });
     }
-
-    await partner.delete({ where: { id: parseInt(req.params.id) } });
-
-    const filename = thatOneParner.filename;
-    const filepath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "public",
-      "images",
-      name,
-      filename
-    );
-    if (fs.existsSync(filepath)) {
-      await fsP.unlink(filepath);
-    }
-    res.status(200).json({ message: "Deleted Successfully" });
+    removeFile(thatOneParner);
+    await partner.delete({ where: { id: parseInt(req.params["id"]) } });
+    res.status(200).json({ message: `Data ${valId} Deleted Successfully` });
   } catch (e) {
     next(e);
   }

@@ -1,13 +1,13 @@
 import express, { NextFunction, Request, Response } from "express";
 import { isAuthenticated } from "../middleware/authMiddleware";
-import { findUserById } from "../services/User.services";
+import { findUserById } from "../controllers/UserController";
 interface Req extends Request {
   payload: any;
 }
 
-const router = express.Router();
+export const userRoutes = express.Router();
 
-router.get(
+userRoutes.get(
   "/profile",
   isAuthenticated,
   async (req: Req, res: Response, next: NextFunction) => {
@@ -21,5 +21,3 @@ router.get(
     }
   }
 );
-
-module.exports = router;

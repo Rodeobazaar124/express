@@ -5,20 +5,22 @@ import {
   addRefreshTokenToWhitelist,
   deleteRefreshToken,
   findRefreshTokenById,
-} from "../services/Auth.services";
+} from "../controllers/AuthController";
 import jwt from "jsonwebtoken";
 export const AuthRoutes = express.Router();
 import {
   findUserByEmail,
   createUserByEmailAndPassword,
   findUserById,
-} from "../services/User.services";
+} from "../controllers/UserController";
+import bcrypt from "bcrypt";
+import { hashToken } from "../app/jwt";
 
 AuthRoutes.post(
   "/register",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { email, password } = req.body;
+      const { name, username, email, password } = req.body;
       if (!email || !password) {
         res.status(400);
         throw new Error(`You must provide an email and a password`);
@@ -28,7 +30,12 @@ AuthRoutes.post(
         res.status(400);
         throw new Error("Email Already In Use");
       }
-      const user = await createUserByEmailAndPassword({ email, password });
+      const user = await createUserByEmailAndPassword({
+        name,
+        username,
+        email,
+        password,
+      });
       const jti = v4();
       const { accessToken, refreshToken } = generateTokens(user, jti);
       await addRefreshTokenToWhitelist({
@@ -46,10 +53,6 @@ AuthRoutes.post(
     }
   }
 );
-
-// add bcrypt at the top of the file.
-import bcrypt from "bcrypt";
-import { hashToken } from "../app/hashToken";
 
 AuthRoutes.post(
   "/login",

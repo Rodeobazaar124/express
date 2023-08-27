@@ -6,20 +6,22 @@ import fs from "fs";
 import { db } from "../app/database";
 import { IdValidation, validate } from "../validation/validation";
 import { ServiceValidation } from "../validation/ServiceValidation";
+import { handleFile, removeFile } from "../middleware/files-middleware";
+import { ResponseError } from "../error/response-error";
 
 const service = db.service;
 const dirname = "services";
 
 export const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!req.params.id) {
+    if (!req.params["id"]) {
       const results = await service.findMany();
       return res.status(200).json({ data: results });
     }
-
+    await validate(IdValidation, req.params["id"]);
     const results = await service.findFirst({
       where: {
-        id: parseInt(req.params.id),
+        id: parseInt(req.params["id"]),
       },
     });
 
@@ -33,138 +35,57 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const create = async (req: any, res: Response, next: NextFunction) => {
-  const valbody = validate(ServiceValidation, req.body, res);
-  if (valbody === null) {
-    return;
-  }
-  // Validasi Data yang sudah ada
-  const ProductExist = await service.count({
-    where: {
-      title: { contains: valbody.title },
-    },
-  });
-  if (ProductExist > 1)
-    return res.status(409).json({ error: "Product already exist" });
-
-  if (req.files === null) {
-    return res.status(400).json({
-      error: {
-        code: "MISSING_LOGO",
-        message: "Bad Request: An image file is required for this operation.",
-        details:
-          "Please make sure to include a valid image file in the 'logo' field.",
+  try {
+    const valbody = validate(ServiceValidation, req.body);
+    // Validasi Data yang sudah ada
+    const ProductExist = await service.count({
+      where: {
+        title: valbody.title,
       },
     });
+    if (ProductExist >= 1)
+      return res.status(409).json({ error: "Product already exist" });
+    const { filename, url } = handleFile(req, "logo");
+    await service.create({
+      data: {
+        title: req.body.title,
+        logo: url,
+        desc: req.body.desc,
+        link: req.body.link,
+        filename: filename,
+      },
+    });
+    res.status(201).json({ message: `Created successfully` });
+  } catch (e) {
+    next(e);
   }
-
-  // File Handler
-  const file = req.files.logo;
-  const filesize = file.data.length;
-  const ext = path.extname(file.name);
-  const filename = file.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-  const url = `${process.env.PROTOCOL}${process.env.HOST}/images/${dirname}/${filename}`;
-
-  // Validasi File Type
-  const allowedType = [".png", ".jpg", ".svg"];
-  if (!allowedType.includes(ext.toLowerCase()))
-    return res.status(422).json({ message: `File Type Unsupported` });
-
-  // Validasi ukuran file
-  if (filesize > 5000000)
-    return res.status(422).json({ message: `File too big` });
-
-  // Menyimpan file
-  file.mv(
-    path.join(__dirname, "..", "..", "public", "images", dirname, filename),
-    async (err: Error) => {
-      if (err) return res.status(500).json({ messages: `${err.message}` });
-
-      // Menyimpan nama file beserta data
-      try {
-        await service.create({
-          data: {
-            title: req.body.title,
-            logo: url,
-            desc: req.body.desc,
-            link: req.body.link,
-            filename: filename,
-          },
-        });
-        res.status(201).json({ message: `Created successfully` });
-      } catch (e) {
-        next(e);
-      }
-    }
-  );
 };
 
 export const update = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const valbody = validate(ServiceValidation, req.body, res);
-    if (valbody === null) {
-      return;
-    }
+    await validate(ServiceValidation, req.body);
 
     // Validate If data exist
     const theServices = await service.findFirst({
-      where: { id: parseInt(req.params.id) },
+      where: { id: parseInt(req.params["id"]) },
     });
     if (theServices === null) {
       return res
         .status(400)
-        .json({ error: `Data ${req.params.id} Not exist!` });
+        .json({ error: `Data ${req.params["id"]} Not exist!` });
     }
-
-    // Validate files
-
-    if (req.files == null)
-      return res.status(400).json({
-        error: true,
-        message: "Image upload required",
-        details: "Image must be uploaded in the 'logo' property",
-      });
-
-    const newfile = req.files.logo;
-    const filesize = newfile.data.length;
-    const ext = path.extname(newfile.name);
-    const filename = newfile.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/images/${dirname}/${filename}`;
-    const allowedType = [".png", ".jpg", ".svg"];
-
-    if (!allowedType.includes(ext.toLowerCase()))
-      return res.status(422).json({ message: `File Type Unsupported` });
-
-    if (filesize > 5000000)
-      return res.status(422).json({ message: `File too big` });
-
-    newfile.mv(
-      path.join(__dirname, "..", "..", "public", "images", dirname, filename)
-    );
-
-    // set the data
+    const { filename: newname, url: newurl } = handleFile(req, "logo");
     await service.update({
       data: {
         desc: req.body.desc,
         title: req.body.title,
         logo: newurl,
+        filename: newname,
         link: req.body.link,
       },
-      where: { id: parseInt(req.params.id) },
+      where: { id: parseInt(req.params["id"]) },
     });
-
-    const filename_fromdb = theServices.filename;
-    const filepath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "public",
-      "images",
-      dirname,
-      filename_fromdb
-    );
-    if (fs.existsSync(filepath)) {
-      await fsP.unlink(filepath);
-    }
+    await removeFile(theServices);
 
     return res.status(200).json({ message: "Data Updated Succesfully" });
   } catch (e) {
@@ -174,35 +95,18 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
 
 export const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const validatedIds = validate(IdValidation, req.params.id, res);
-    if (validatedIds === null) {
-      return;
-    }
+    const validatedIds = validate(IdValidation, req.params["id"]);
+
     const Service = await service.findFirst({
       where: { id: validatedIds },
     });
 
     if (Service === null) {
-      return res
-        .status(400)
-        .json({ error: `Data ${req.params.id} Not exist!` });
+      throw new ResponseError(404, `Service ${req.params["id"]} Not exist!`);
     }
 
-    await service.delete({ where: { id: parseInt(req.params.id) } });
-
-    const filename = Service.filename;
-    const filepath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "public",
-      "images",
-      dirname,
-      filename
-    );
-    if (fs.existsSync(filepath)) {
-      await fsP.unlink(filepath);
-    }
+    await service.delete({ where: { id: parseInt(req.params["id"]) } });
+    await removeFile(Service);
     res.status(200).json({ message: "Deleted Successfully" });
   } catch (e) {
     next(e);

@@ -1,25 +1,21 @@
 import { NextFunction, Request, Response } from "express";
-import path from "path";
-import moment from "moment";
-import fsP from "fs/promises";
-import fs from "fs";
 import { db } from "../app/database";
 import { IdValidation, validate } from "../validation/validation";
 import { TestimonyValidation } from "../validation/TestimonyValidation";
+import { handleFile, removeFile } from "../middleware/files-middleware";
 
 const Testimony = db.testimony;
-const dirname = "avatars";
 
 export const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!req.params.id) {
+    if (!req.params["id"]) {
       const results = await Testimony.findMany();
       return res.status(200).json({ data: results });
     }
 
     const result = await Testimony.findFirst({
       where: {
-        id: parseInt(req.params.id),
+        id: parseInt(req.params["id"]),
       },
     });
 
@@ -33,140 +29,63 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const create = async (req: any, res: Response, next: NextFunction) => {
-  const valbody = validate(TestimonyValidation, req.body, res);
-  if (valbody === null) {
-    return;
-  }
-  // Validasi Data yang sudah ada
-  const TestimonyExist = await Testimony.findFirst({
-    where: {
-      username: valbody.username,
-    },
-  });
-  if (TestimonyExist != null)
-    return res.status(409).json({ error: "Testimony already exist" });
-
-  if (req.files === null) {
-    return res.status(400).json({
-      error: {
-        code: "MISSING_AVATARS",
-        message: "Bad Request: An avatar file is required for this operation.",
-        details:
-          "Please make sure to include a valid image file in the 'avatar' field.",
+  try {
+    const valbody = validate(TestimonyValidation, req.body);
+    // Validasi Data yang sudah ada
+    const TestimonyExist = await Testimony.findFirst({
+      where: {
+        username: valbody.username,
       },
     });
+    if (TestimonyExist != null)
+      return res.status(409).json({ error: "Testimony already exist" });
+    const { filename, url } = handleFile(req, "avatar");
+
+    await Testimony.create({
+      data: {
+        username: valbody.username,
+        avatar: url,
+        rating: valbody.rating,
+        location: valbody.location,
+        comment: valbody.comment,
+        filename: filename,
+      },
+    });
+    res.status(201).json({ message: `Created successfully` });
+  } catch (e) {
+    next(e);
   }
-
-  // File Handler
-  const file = req.files.avatar;
-  const filesize = file.data.length;
-  const ext = path.extname(file.name);
-  const filename = file.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-  const url = `${process.env.PROTOCOL}${process.env.HOST}/${dirname}/${filename}`;
-
-  // Validasi File Type
-  const allowedType = [".png", ".jpg", ".svg"];
-  if (!allowedType.includes(ext.toLowerCase()))
-    return res.status(422).json({ message: `File Type Unsupported` });
-
-  // Validasi ukuran file
-  if (filesize > 5000000)
-    return res.status(422).json({ message: `File too big` });
-
-  // Menyimpan file
-  file.mv(
-    path.join(__dirname, "..", "..", "public", "images", "avatars", filename),
-    async (err: Error) => {
-      if (err) return res.status(500).json({ messages: `${err.message}` });
-
-      // Menyimpan nama file beserta data
-      try {
-        await Testimony.create({
-          data: {
-            username: valbody.username,
-            avatar: url,
-            rating: valbody.rating,
-            location: valbody.location,
-            comment: valbody.comment,
-            filename: filename,
-          },
-        });
-        res.status(201).json({ message: `Created successfully` });
-      } catch (e) {
-        next(e);
-      }
-    }
-  );
 };
 
 export const update = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const valbody = validate(TestimonyValidation, req.body, res);
-    if (valbody === null) {
-      return;
-    }
+    const valbody = validate(TestimonyValidation, req.body);
 
     // Validate If data exist
     const thatOne = await Testimony.findFirst({
-      where: { id: parseInt(req.params.id) },
+      where: { id: parseInt(req.params["id"]) },
     });
     if (thatOne === null) {
-      return res.status(400).json({ error: `ID ${req.params.id} Not exist!` });
+      return res
+        .status(400)
+        .json({ error: `ID ${req.params["id"]} Not exist!` });
     }
+    const { filename: newname, url: newurl } = handleFile(req, "avatar");
 
-    // Validate files
-
-    if (req.files === null)
-      return res.status(400).json({
-        error: true,
-        message: "avatar upload required",
-        details: "Image must be uploaded in the 'avatar' property",
-      });
-
-    const newfile = req.files.avatar;
-    const filesize = newfile.data.length;
-    const ext = path.extname(newfile.name);
-    const filename = newfile.md5 + moment().format("DDMMYYY-h_mm_ss") + ext;
-    const newurl = `${process.env.PROTOCOL}${process.env.HOST}/${dirname}/${filename}`;
-    const allowedType = [".png", ".jpg", ".svg"];
-
-    if (!allowedType.includes(ext.toLowerCase()))
-      return res.status(422).json({ message: `File Type Unsupported` });
-
-    if (filesize > 5000000)
-      return res.status(422).json({ message: `File too big` });
-
-    newfile.mv(
-      path.join(__dirname, "..", "..", "public", "images", dirname, filename)
-    );
-
-    // set the data
     await Testimony.update({
       data: {
         username: valbody.username,
         avatar: newurl,
+        filename: newname,
         rating: valbody.rating,
         location: valbody.location,
         comment: valbody.comment,
       },
       where: {
-        id: parseInt(req.params.id),
+        id: parseInt(req.params["id"]),
       },
     });
-
-    const filepath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "public",
-      "images",
-      dirname,
-      thatOne.filename
-    );
-    if (fs.existsSync(filepath)) {
-      await fsP.unlink(filepath);
-    }
-
+    await removeFile(thatOne);
     return res.status(200).json({ message: "Data Updated Succesfully" });
   } catch (e) {
     next(e);
@@ -175,13 +94,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
 
 export const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const validatedIds = validate(IdValidation, req.params.id, res);
-    if (validatedIds === null) {
-      return;
-    }
-    if (validatedIds === null) {
-      return;
-    }
+    const validatedIds = validate(IdValidation, req.params["id"]);
     const theTestimony = await Testimony.findFirst({
       where: { id: validatedIds },
     });
@@ -189,26 +102,11 @@ export const remove = async (req: any, res: Response, next: NextFunction) => {
     if (theTestimony === null) {
       return res
         .status(400)
-        .json({ error: `Data ${req.params.id} Not exist!` });
+        .json({ error: `Data ${req.params["id"]} Not exist!` });
     }
 
-    await Testimony.delete({ where: { id: parseInt(req.params.id) } });
-
-    const file = theTestimony.avatar.split("/");
-    const filename = file[file.length - 1];
-    const filepath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "public",
-      "images",
-      dirname,
-      theTestimony.filename
-    );
-    if (fs.existsSync(filepath)) {
-      await fsP.unlink(filepath);
-    }
-
+    await Testimony.delete({ where: { id: parseInt(req.params["id"]) } });
+    await removeFile(theTestimony);
     res.status(200).json({ message: "Deleted Successfully" });
   } catch (e) {
     next(e);
