@@ -16,43 +16,45 @@ import {
 import bcrypt from "bcrypt";
 import { hashToken } from "../app/jwt";
 
-AuthRoutes.post(
-  "/register",
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { name, username, email, password } = req.body;
-      if (!email || !password) {
-        res.status(400);
-        throw new Error(`You must provide an email and a password`);
-      }
-      const existingUser = await findUserByEmail(email);
-      if (existingUser) {
-        res.status(400);
-        throw new Error("Email Already In Use");
-      }
-      const user = await createUserByEmailAndPassword({
-        name,
-        username,
-        email,
-        password,
-      });
-      const jti = v4();
-      const { accessToken, refreshToken } = generateTokens(user, jti);
-      await addRefreshTokenToWhitelist({
-        jti,
-        refreshToken,
-        userId: user.id,
-      });
+if (process.env.REGISTER_ENABLED == "true") {
+  AuthRoutes.post(
+    "/register",
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { name, username, email, password } = req.body;
+        if (!email || !password) {
+          res.status(400);
+          throw new Error(`You must provide an email and a password`);
+        }
+        const existingUser = await findUserByEmail(email);
+        if (existingUser) {
+          res.status(400);
+          throw new Error("Email Already In Use");
+        }
+        const user = await createUserByEmailAndPassword({
+          name,
+          username,
+          email,
+          password,
+        });
+        const jti = v4();
+        const { accessToken, refreshToken } = generateTokens(user, jti);
+        await addRefreshTokenToWhitelist({
+          jti,
+          refreshToken,
+          userId: user.id,
+        });
 
-      res.json({
-        accessToken,
-        refreshToken,
-      });
-    } catch (err) {
-      next(err);
+        res.json({
+          accessToken,
+          refreshToken,
+        });
+      } catch (err) {
+        next(err);
+      }
     }
-  }
-);
+  );
+}
 
 AuthRoutes.post(
   "/login",

@@ -32,7 +32,9 @@ import {
 } from "../controllers/PortofolioController";
 const PrivateRoutes = express.Router();
 
-// PrivateRoutes.use(isAuthenticated);
+if (process.env.AUTH_NEEDED == "true") {
+  PrivateRoutes.use(isAuthenticated);
+}
 // HERO
 PrivateRoutes.post("/hero/:id", cHero);
 PrivateRoutes.post("/hero", (req: Request, res: Response) => {

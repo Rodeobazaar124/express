@@ -23,8 +23,10 @@ app.use(express.static(path.join("public")));
 // app.use("/Testimonies", TestimoniesRoutes);
 app.use("/api/v1", PrivateRoutes);
 app.use("/api/v1", Routes);
-app.use("/api/v1/auth", AuthRoutes);
-app.use("/api/v1/users", userRoutes);
+if (process.env.AUTH_ENABLED == "true") {
+  app.use("/api/v1/auth", AuthRoutes);
+  app.use("/api/v1/users", userRoutes);
+}
 app.use(view);
 
 app.get("*", (req, res) => {
