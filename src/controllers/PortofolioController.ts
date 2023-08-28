@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { db } from "../app/database";
-import { IdValidation, validate } from "../validation/validation";
+import { IdValidation, Validate } from "../validation/validation";
 import { PortofolioValidation } from "../validation/PortofolioValidation";
 import { ResponseError } from "../error/response-error";
 import { handleFile, removeFile } from "../middleware/files-middleware";
@@ -12,7 +12,7 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
       const results = await portofolio.findMany();
       return res.status(200).json({ data: results });
     }
-    await validate(IdValidation, req.params["id"]);
+    await Validate(IdValidation, req.params["id"]);
     const result = await portofolio.findFirst({
       where: {
         id: parseInt(req.params["id"]),
@@ -33,7 +33,7 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
 
 export const create = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const valbody = validate(PortofolioValidation, req.body);
+    const valbody = Validate(PortofolioValidation, req.body);
     const portofolioExist = await portofolio.findFirst({
       where: {
         title: valbody.title,
@@ -58,7 +58,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
 
 export const update = async (req: any, res: Response, next: NextFunction) => {
   try {
-    await validate(PortofolioValidation, req.body);
+    await Validate(PortofolioValidation, req.body);
     const theportofolio = await portofolio.findFirst({
       where: { id: parseInt(req.params["id"]) },
     });
@@ -89,7 +89,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
 
 export const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const validatedIds = validate(IdValidation, req.params["id"]);
+    const validatedIds = Validate(IdValidation, req.params["id"]);
     if (validatedIds === null) {
       return;
     }

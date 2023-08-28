@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { db } from "../app/database";
-import { IdValidation, validate } from "../validation/validation";
+import { IdValidation, Validate } from "../validation/validation";
 import { handleFile, removeFile } from "../middleware/files-middleware";
 import { ResponseError } from "../error/response-error";
 import { PartnerValidation } from "../validation/PartnerValidation";
@@ -12,7 +12,7 @@ export const get = async (req: any, res: Response, next: NextFunction) => {
       const results = await partner.findMany();
       return res.status(200).json({ data: results });
     }
-    await validate(IdValidation, req.params["id"]);
+    await Validate(IdValidation, req.params["id"]);
 
     const result = await partner.findFirst({
       where: {
@@ -31,7 +31,7 @@ export const get = async (req: any, res: Response, next: NextFunction) => {
 
 export const create = async (req: any, res: Response, next: NextFunction) => {
   try {
-    await validate(PartnerValidation, req.body);
+    await Validate(PartnerValidation, req.body);
     const partnerExist = await partner.count({
       where: {
         name: req.body.name,
@@ -55,8 +55,8 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
 
 export const update = async (req: any, res: Response, next: NextFunction) => {
   try {
-    await validate(IdValidation, req.params["id"]);
-    await validate(PartnerValidation, req.body);
+    await Validate(IdValidation, req.params["id"]);
+    await Validate(PartnerValidation, req.body);
 
     const thatOnePartner = await partner.findFirst({
       where: { id: parseInt(req.params["id"]) },
@@ -88,7 +88,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
 
 export const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const valId = validate(IdValidation, req.params["id"]);
+    const valId = Validate(IdValidation, req.params["id"]);
     const thatOneParner = await partner.findFirst({
       where: { id: valId },
     });

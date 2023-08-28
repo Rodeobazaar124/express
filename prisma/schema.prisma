@@ -11,47 +11,57 @@ datasource db {
 }
 
 model Product {
-  id       Int    @id @default(autoincrement())
-  title    String @unique
-  desc     String @db.Text
-  image    String
-  filename String
+  id        Int      @id @default(autoincrement())
+  title     String   @unique
+  desc      String   @db.Text
+  image     String
+  filename  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model Portofolio {
-  id       Int    @id @default(autoincrement())
-  title    String
-  desc     String @db.Text
-  image    String
-  filename String
+  id        Int      @id @default(autoincrement())
+  title     String
+  desc      String   @db.Text
+  image     String
+  filename  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model Service {
-  id       Int     @id @default(autoincrement())
-  title    String
-  desc     String? @db.Text
-  link     String
-  logo     String
-  filename String
+  id        Int      @id @default(autoincrement())
+  title     String
+  desc      String?  @db.Text
+  link      String
+  logo      String
+  filename  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model Testimony {
-  id       Int    @id @default(autoincrement())
-  username String
-  location String
-  comment  String @db.Text
-  rating   Float
-  avatar   String
-  filename String
+  id        Int      @id @default(autoincrement())
+  username  String
+  location  String
+  comment   String   @db.Text
+  rating    Float
+  avatar    String
+  filename  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model Hero {
-  id       Int     @id @default(autoincrement())
-  number   Int?
-  position String
-  text     String
-  hText    String?
-  desc     String?
+  id        Int      @id @default(autoincrement())
+  number    Int?
+  position  String
+  text      String
+  hText     String?
+  desc      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model User {
@@ -70,18 +80,21 @@ model User {
 }
 
 model Partnership {
-  id       Int     @id @default(autoincrement())
-  name     String?
-  image    String
-  filename String
+  id        Int      @id @default(autoincrement())
+  name      String?
+  image     String
+  filename  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
-model noiu_in_number {
-  id        Int @id @default(autoincrement())
-  client    Int
-  produk    Int
-  pekerjaan Int
-  tim       Int
+model noiu_in_range {
+  id        Int      @id @default(autoincrement())
+  name      String
+  slug      String   @unique()
+  amount    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model RefreshToken {

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { db } from "../app/database";
-import { IdValidation, validate } from "../validation/validation";
+import { IdValidation, Validate } from "../validation/validation";
 import { HeroValidation } from "../validation/HeroValidation";
 
 const hero = db.hero;
@@ -51,7 +51,7 @@ export const create = async (
   res: Response,
   next: NextFunction
 ) => {
-  const valbody = validate(HeroValidation, req.body);
+  const valbody = Validate(HeroValidation, req.body);
   switch (req.params["id"].toLowerCase()) {
     case "left":
       valbody.position = "left";
@@ -96,8 +96,8 @@ export const create = async (
 };
 
 export const update = async (req: Request, res: Response) => {
-  const valbody = validate(HeroValidation, req.body);
-  const valIds = validate(IdValidation, req.params["id"]);
+  const valbody = Validate(HeroValidation, req.body);
+  const valIds = Validate(IdValidation, req.params["id"]);
 
   // Validate If data exist
   const theProduct = await hero.findFirst({
@@ -116,7 +116,7 @@ export const update = async (req: Request, res: Response) => {
 };
 
 export const remove = async (req: Request, res: Response) => {
-  const valIds = validate(IdValidation, req.params["id"]);
+  const valIds = Validate(IdValidation, req.params["id"]);
   const check = await hero.findFirst({ where: { id: valIds } });
   if (check === null) {
     return res.status(400).json({ error: `ID ${valIds} Not exist!` });

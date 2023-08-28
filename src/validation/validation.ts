@@ -4,7 +4,7 @@ import { ResponseError } from "../error/response-error";
 
 export const IdValidation = Joi.number().min(1).positive().required();
 
-export const validate = (schema: Joi.Schema, request: any) => {
+export const Validate = (schema: Joi.Schema, request: any) => {
   const result = schema.validate(request, {
     abortEarly: false,
   });

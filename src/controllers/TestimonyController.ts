@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { db } from "../app/database";
-import { IdValidation, validate } from "../validation/validation";
+import { IdValidation, Validate } from "../validation/validation";
 import { TestimonyValidation } from "../validation/TestimonyValidation";
 import { handleFile, removeFile } from "../middleware/files-middleware";
 
@@ -30,7 +30,7 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
 
 export const create = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const valbody = validate(TestimonyValidation, req.body);
+    const valbody = Validate(TestimonyValidation, req.body);
     // Validasi Data yang sudah ada
     const TestimonyExist = await Testimony.findFirst({
       where: {
@@ -59,7 +59,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
 
 export const update = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const valbody = validate(TestimonyValidation, req.body);
+    const valbody = Validate(TestimonyValidation, req.body);
 
     // Validate If data exist
     const thatOne = await Testimony.findFirst({
@@ -94,7 +94,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
 
 export const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const validatedIds = validate(IdValidation, req.params["id"]);
+    const validatedIds = Validate(IdValidation, req.params["id"]);
     const theTestimony = await Testimony.findFirst({
       where: { id: validatedIds },
     });

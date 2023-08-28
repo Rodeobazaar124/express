@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { db } from "../app/database";
-import { IdValidation, validate } from "../validation/validation";
+import { IdValidation, Validate } from "../validation/validation";
 import { ProductBodyValidation } from "../validation/ProductValidation";
 import { handleFile, removeFile } from "../middleware/files-middleware";
 import { ResponseError } from "../error/response-error";
@@ -13,7 +13,7 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
       const results = await product.findMany();
       return res.status(200).json({ data: results });
     }
-    await validate(IdValidation, req.params["id"]);
+    await Validate(IdValidation, req.params["id"]);
     const result = await product.findFirst({
       where: {
         id: parseInt(req.params["id"]),
@@ -31,7 +31,7 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
 
 export const create = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const valbody = await validate(ProductBodyValidation, req.body);
+    const valbody = await Validate(ProductBodyValidation, req.body);
     const ProductExist = await product.findFirst({
       where: {
         title: valbody.title,
@@ -57,7 +57,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
 
 export const update = async (req: any, res: Response, next: NextFunction) => {
   try {
-    await validate(ProductBodyValidation, req.body);
+    await Validate(ProductBodyValidation, req.body);
 
     // Validate If data exist
     const theProduct = await product.findFirst({
@@ -91,7 +91,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
 
 export const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const validatedIds = await validate(IdValidation, req.params["id"]);
+    const validatedIds = await Validate(IdValidation, req.params["id"]);
 
     const theProduct = await product.findFirst({
       where: { id: validatedIds },

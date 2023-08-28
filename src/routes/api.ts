@@ -1,3 +1,8 @@
+import {
+  createRange,
+  updateRange,
+  deleteRange,
+} from "../controllers/RangeController";
 import express, { Request, Response } from "express";
 import {
   create as cHero,
@@ -68,4 +73,8 @@ PrivateRoutes.post("/portofolio", cPorto);
 PrivateRoutes.route("/portofolio/:id").patch(uPorto);
 PrivateRoutes.route("/portofolio/:id").delete(delPorto);
 
+// NOIU IN RANGE
+PrivateRoutes.post("/range", createRange);
+PrivateRoutes.route("/range/:slug").patch(updateRange);
+PrivateRoutes.route("/range/:slug").delete(deleteRange);
 export default PrivateRoutes;

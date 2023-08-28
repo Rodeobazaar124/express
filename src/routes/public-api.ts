@@ -1,5 +1,6 @@
 import { Router } from "express";
 
+import { readRange } from "../controllers/RangeController";
 import { get as getHero } from "../controllers/HeroController";
 import { get as getPartner } from "../controllers/PartnerController";
 import { get as getServices } from "../controllers/servicesController";
@@ -30,8 +31,12 @@ Routes.route("/testimony/:id").get(getTestimony);
 Routes.route("/product/").get(getProducts);
 Routes.route("/product/:id").get(getProducts);
 
-// PRODUCT
+// PORTOFOLIO
 Routes.route("/portofolio/").get(getPortofolio);
 Routes.route("/portofolio/:id").get(getPortofolio);
+
+// NOIU IN RANGE
+Routes.route("/range/").get(readRange);
+Routes.route("/range/:slug").get(readRange);
 
 export default Routes;
