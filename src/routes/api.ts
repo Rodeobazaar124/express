@@ -32,7 +32,7 @@ import {
 } from "../controllers/PortofolioController";
 const PrivateRoutes = express.Router();
 
-if (process.env.AUTH_NEEDED == "true") {
+if (process.env.AUTH_ENABLED == "true") {
   PrivateRoutes.use(isAuthenticated);
 }
 // HERO

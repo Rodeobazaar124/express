@@ -15,6 +15,7 @@ import {
 } from "../controllers/UserController";
 import bcrypt from "bcrypt";
 import { hashToken } from "../app/jwt";
+import { ResponseError } from "../error/response-error";
 
 if (process.env.REGISTER_ENABLED == "true") {
   AuthRoutes.post(
@@ -23,13 +24,14 @@ if (process.env.REGISTER_ENABLED == "true") {
       try {
         const { name, username, email, password } = req.body;
         if (!email || !password) {
-          res.status(400);
-          throw new Error(`You must provide an email and a password`);
+          throw new ResponseError(
+            400,
+            `You must provide an email and a password`
+          );
         }
         const existingUser = await findUserByEmail(email);
         if (existingUser) {
-          res.status(400);
-          throw new Error("Email Already In Use");
+          throw new ResponseError(400, "Email Already In Use");
         }
         const user = await createUserByEmailAndPassword({
           name,
