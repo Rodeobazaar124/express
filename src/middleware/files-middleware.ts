@@ -33,7 +33,7 @@ export const handleFile = (req: Request | any, field: string | any) => {
 
   const filename =
     files.md5 + moment().format("DDMMYYY-h_mm_ss") + path.extname(files.name);
-  const url = `/images/${filename}`;
+  const url = `${process.env.PROTOCOL}${process.env.HOST}/images/${filename}`;
 
   files.mv(path.join("public", "images", filename));
   return { filename, url };
