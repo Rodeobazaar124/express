@@ -1,7 +1,7 @@
 {
   "name": "site-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "author": "Rodeobazaar124 <azfasa15@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -18,6 +18,9 @@
     "winston": "^3.10.0"
   },
   "scripts": {
+    "build": "tsc",
+    "start-js": "tsc && node dist/index.js",
+    "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "reseed": "prisma migrate reset --force && prisma db push && ts-node dbseeder.ts && pnpm dev",
     "studio": "prisma studio"

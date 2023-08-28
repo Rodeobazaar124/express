@@ -10,6 +10,7 @@ import Routes from "../routes/public-api";
 import PrivateRoutes from "../routes/api";
 import view from "../routes/view";
 import { userRoutes } from "../routes/UserRoutes";
+import { checkOrCreatePublicFolder } from "../middleware/files-middleware";
 export const app = express();
 
 export const PORT = process.env.PORT || 80 || 8000;
@@ -36,5 +37,4 @@ app.get("*", (req, res) => {
     res.send("404 Not Found");
   }
 });
-
 app.use(errorMiddleware);

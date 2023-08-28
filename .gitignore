@@ -6,3 +6,10 @@ yarn.lock
 public/
 pnpm-lock.yaml
 prisma/migrations/migration_lock.toml
+dist/app
+dist/validation
+dist/controllers
+dist/error
+dist/index.js
+dist/middleware
+dist/routes

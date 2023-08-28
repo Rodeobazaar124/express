@@ -53,15 +53,15 @@ export const removeFile = async (theObject: any) => {
   }
 };
 
-export const checkOrCreatePublicFolder = () => {
+export const checkOrCreatePublicFolder = async () => {
   try {
     if (!fs.existsSync(path.join("public"))) {
-      fsp.mkdir(path.join("public"));
-      if (!fs.existsSync(path.join("public", "images"))) {
-        fsp.mkdir(path.join("public", "images"));
-      }
+      await fsp.mkdir(path.join("public"));
+    }
+    if (!fs.existsSync(path.join("public", "images"))) {
+      await fsp.mkdir(path.join("public", "images"));
     }
   } catch (error) {
-    logger.error(error);
+    throw new ResponseError(500, error);
   }
 };
