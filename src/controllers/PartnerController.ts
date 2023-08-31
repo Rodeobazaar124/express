@@ -4,6 +4,7 @@ import { IdValidation, Validate } from "../validation/validation";
 import { handleFile, removeFile } from "../middleware/files-middleware";
 import { ResponseError } from "../error/response-error";
 import { PartnerValidation } from "../validation/PartnerValidation";
+import { Action, checkExistsThrow } from "../middleware/checkfromdb";
 const partner = db.partnership;
 
 export const get = async (req: any, res: Response, next: NextFunction) => {
@@ -13,16 +14,13 @@ export const get = async (req: any, res: Response, next: NextFunction) => {
       return res.status(200).json({ data: results });
     }
     await Validate(IdValidation, req.params["id"]);
+    const result = await checkExistsThrow(
+      "Partnership",
+      "id",
+      Number(req.params["id"]),
+      Action.GET
+    );
 
-    const result = await partner.findFirst({
-      where: {
-        id: parseInt(req.params["id"]),
-      },
-    });
-
-    if (result === null) {
-      return res.status(404).json({ errors: "Data Not Found" });
-    }
     return res.status(200).json({ data: result });
   } catch (error) {
     next(error);
@@ -32,22 +30,22 @@ export const get = async (req: any, res: Response, next: NextFunction) => {
 export const create = async (req: any, res: Response, next: NextFunction) => {
   try {
     await Validate(PartnerValidation, req.body);
-    const partnerExist = await partner.count({
-      where: {
-        name: req.body.name,
-      },
-    });
-    if (partnerExist >= 1)
-      throw new ResponseError(409, `Partner ${req.body.name} already exist`);
+    const partnerExist = await checkExistsThrow(
+      "Partnership",
+      "name",
+      req.body["name"],
+      Action.CREATE
+    );
+
     const { filename, url } = handleFile(req, "image");
-    await partner.create({
+    const data = await partner.create({
       data: {
         name: req.body.name,
         image: url,
         filename: filename,
       },
     });
-    res.status(201).json({ message: `Created successfully` });
+    res.status(201).json({ message: `Created successfully`, data });
   } catch (error) {
     next(error);
   }
@@ -57,14 +55,12 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
   try {
     await Validate(IdValidation, req.params["id"]);
     await Validate(PartnerValidation, req.body);
-
-    const thatOnePartner = await partner.findFirst({
-      where: { id: parseInt(req.params["id"]) },
-    });
-    if (thatOnePartner === null) {
-      throw new ResponseError(400, `Partner ${req.params["id"]} Not exist!`);
-    }
-
+    const thatOnePartner = await checkExistsThrow(
+      "Partnership",
+      "name",
+      req.body["name"],
+      Action.UPDATE
+    );
     const { filename: newname, url: newurl } = handleFile(req, "image");
 
     // set the data
@@ -88,17 +84,15 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
 
 export const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const valId = Validate(IdValidation, req.params["id"]);
-    const thatOneParner = await partner.findFirst({
-      where: { id: valId },
-    });
+    const valId: Number = await Validate(IdValidation, req.params["id"]);
+    const thatOnePartner = await checkExistsThrow(
+      "Partnership",
+      "id",
+      valId,
+      Action.DELETE
+    );
 
-    if (thatOneParner === null) {
-      return res
-        .status(400)
-        .json({ error: `Data ${req.params["id"]} Not exist!` });
-    }
-    removeFile(thatOneParner);
+    removeFile(thatOnePartner);
     await partner.delete({ where: { id: parseInt(req.params["id"]) } });
     res.status(200).json({ message: `Data ${valId} Deleted Successfully` });
   } catch (e) {

@@ -95,7 +95,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
 
 export const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const validatedIds = Validate(IdValidation, req.params["id"]);
+    const validatedIds = await Validate(IdValidation, req.params["id"]);
 
     const Service = await service.findFirst({
       where: { id: validatedIds },

@@ -41,12 +41,7 @@ if (process.env.AUTH_ENABLED == "true") {
   PrivateRoutes.use(isAuthenticated);
 }
 // HERO
-PrivateRoutes.post("/hero/:id", cHero);
-PrivateRoutes.post("/hero", (req: Request, res: Response) => {
-  return res.status(418).json({
-    message: "Please input ID or position ('left' or 'right') in params",
-  });
-});
+PrivateRoutes.post("/hero", cHero);
 PrivateRoutes.route("/hero/:id").patch(uHero);
 PrivateRoutes.route("/hero/:id").delete(delHero);
 

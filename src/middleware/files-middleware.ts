@@ -5,9 +5,8 @@ import path from "path";
 import { ResponseError } from "../error/response-error";
 import fs from "fs";
 import fsp from "fs/promises";
-import { logger } from "../app/logging";
 
-const mb = parseInt(process.env.FILE_SIZE_LIMIT_IN_MB) | 5;
+const mb = parseInt(process.env.FILE_SIZE_LIMIT_IN_MB) || 5;
 const FILESIZE_LIMIT: number = mb * 1024 * 1024;
 const allowedType = [".png", ".jpg", ".svg", ".jpeg", ".bmp", ".gif"];
 
@@ -62,6 +61,6 @@ export const checkOrCreatePublicFolder = async () => {
       await fsp.mkdir(path.join("public", "images"));
     }
   } catch (error) {
-    throw new ResponseError(500, error);
+    throw new ResponseError(500, `[Please Repeat Your Request]` + error);
   }
 };

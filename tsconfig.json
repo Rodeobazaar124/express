@@ -4,7 +4,8 @@
     "removeComments": true,
     "outDir": "./dist"
   },
-  "include": [
-    "src/*"
+  "exclude": [
+    "prettier.config.ts",
+    "dbseeder.ts"
   ]
 }
