@@ -8,7 +8,7 @@ import {
 import { ResponseError } from "../error/response-error";
 import { db } from "../app/database";
 
-export const slugMaker = (name: string) => {
+const slugMaker = (name: string) => {
   try {
     const slug: string = name
       .replace(/ /g, "-") // Use regex to replace all occurrences of spaces with dashes
@@ -20,11 +20,7 @@ export const slugMaker = (name: string) => {
   }
 };
 
-export const createRange = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const body = await Validate(NoiuInRangeValidation, req.body);
     body["slug"] = slugMaker(body.name);
@@ -44,11 +40,7 @@ export const createRange = async (
   }
 };
 
-export const readRange = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.params["slug"]) {
       const ranges = await db.noiu_in_range.findMany();
@@ -68,11 +60,7 @@ export const readRange = async (
   }
 };
 
-export const updateRange = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Validate params slug
     const slugParams = await Validate(slugVal, req.params["slug"]);
@@ -118,11 +106,7 @@ export const updateRange = async (
   }
 };
 
-export const deleteRange = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await db.noiu_in_range.delete({ where: { slug: req.params["slug"] } }); // Use await for the delete operation
     res.status(204).send(); // Send a success response with no content
@@ -130,3 +114,5 @@ export const deleteRange = async (
     next(e);
   }
 };
+
+export default { create, get, update, remove };

@@ -2,12 +2,12 @@ import { NextFunction, Request, Response } from "express";
 import { db } from "../app/database";
 import { IdValidation, Validate } from "../validation/validation";
 import { handleFile, removeFile } from "../middleware/files-middleware";
-import { ResponseError } from "../error/response-error";
 import { PartnerValidation } from "../validation/PartnerValidation";
 import { Action, checkExistsThrow } from "../middleware/checkfromdb";
+import { slugVal } from "../validation/RangeValidation";
 const partner = db.partnership;
 
-export const get = async (req: any, res: Response, next: NextFunction) => {
+const get = async (req: any, res: Response, next: NextFunction) => {
   try {
     if (!req.params["id"]) {
       const results = await partner.findMany();
@@ -27,7 +27,7 @@ export const get = async (req: any, res: Response, next: NextFunction) => {
   }
 };
 
-export const create = async (req: any, res: Response, next: NextFunction) => {
+const create = async (req: any, res: Response, next: NextFunction) => {
   try {
     await Validate(PartnerValidation, req.body);
     const partnerExist = await checkExistsThrow(
@@ -51,16 +51,17 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
   }
 };
 
-export const update = async (req: any, res: Response, next: NextFunction) => {
+const update = async (req: any, res: Response, next: NextFunction) => {
   try {
     await Validate(IdValidation, req.params["id"]);
     await Validate(PartnerValidation, req.body);
     const thatOnePartner = await checkExistsThrow(
       "Partnership",
-      "name",
-      req.body["name"],
+      "id",
+      Number(req.params["id"]),
       Action.UPDATE
     );
+
     const { filename: newname, url: newurl } = handleFile(req, "image");
 
     // set the data
@@ -82,7 +83,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
   }
 };
 
-export const remove = async (req: any, res: Response, next: NextFunction) => {
+const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
     const valId: Number = await Validate(IdValidation, req.params["id"]);
     const thatOnePartner = await checkExistsThrow(
@@ -99,3 +100,5 @@ export const remove = async (req: any, res: Response, next: NextFunction) => {
     next(e);
   }
 };
+
+export default { create, get, update, remove };

@@ -11,7 +11,7 @@ import { ResponseError } from "../error/response-error";
 
 const hero = db.hero;
 
-export const get = async (req: Request, res: Response, next: NextFunction) => {
+const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     //   getMany
 
@@ -50,11 +50,7 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export const create = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await Validate(HeroPosVal, req.body);
     let valbody: any;
@@ -83,11 +79,7 @@ export const create = async (
   }
 };
 
-export const update = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Cek apakah params punya ID yang benar
     const valIds = await Validate(IdValidation, req.params["id"]);
@@ -126,11 +118,7 @@ export const update = async (
   }
 };
 
-export const remove = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const valIds = await Validate(IdValidation, req.params["id"]);
     const { result } = await checkExistsThrow(
@@ -140,8 +128,12 @@ export const remove = async (
       Action.DELETE
     );
     await hero.delete({ where: { id: valIds } });
-    return res.status(200).json({ msg: "data deleted", data: result });
+    return res
+      .status(200)
+      .json({ message: `Hero ID ${result.id} deleted successfully` });
   } catch (e) {
     next(e);
   }
 };
+
+export default { create, get, update, remove };

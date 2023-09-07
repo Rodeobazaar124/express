@@ -40,11 +40,10 @@ export const handleFile = (req: Request | any, field: string | any) => {
 
 export const removeFile = async (theObject: any) => {
   try {
-    await checkOrCreatePublicFolder();
     const fname_db = theObject.filename;
     const filepath = path.join("public", "images", fname_db);
     if (fs.existsSync(filepath)) {
-      await fsp.unlink(filepath);
+      fs.unlinkSync(filepath);
     }
     return "success";
   } catch (error) {

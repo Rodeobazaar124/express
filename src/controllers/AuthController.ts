@@ -15,7 +15,7 @@ export const addRefreshTokenToWhitelist = function ({
 };
 
 // used to check if the token sent by the client is in the database.
-export const findRefreshTokenById = function (id) {
+export const findRefreshTokenById = function (id: string | any) {
   return db.refreshToken.findUnique({
     where: {
       id,
@@ -24,7 +24,7 @@ export const findRefreshTokenById = function (id) {
 };
 
 // soft delete tokens after usage.
-export const deleteRefreshToken = function (id) {
+export const deleteRefreshToken = function (id: string | any) {
   return db.refreshToken.update({
     where: {
       id,
@@ -35,7 +35,7 @@ export const deleteRefreshToken = function (id) {
   });
 };
 
-export const revokeTokens = function (userId) {
+export const revokeTokens = function (userId: string | String | any) {
   return db.refreshToken.updateMany({
     where: {
       userId,

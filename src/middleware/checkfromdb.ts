@@ -16,22 +16,20 @@ export const checkExistsThrow = async (
   whatYouAreDoing: Action
 ) => {
   const table = db[tableName];
+  column.toLowerCase() == "id" ? (whatToParse = parseInt(whatToParse)) : "";
   const result = await table.findFirst({
     where: {
       [column]: whatToParse,
     },
   });
-
   if (result === null) {
     if (
       whatYouAreDoing === Action.GET ||
       whatYouAreDoing === Action.UPDATE ||
       whatYouAreDoing === Action.DELETE
     ) {
-      throw new ResponseError(
-        404,
-        `CANNOT ${whatYouAreDoing.toUpperCase()} DATA. DATA ${column.toUpperCase()} ${whatToParse} NOT FOUND`
-      );
+      const msg = `CANNOT ${whatYouAreDoing} DATA. DATA ${column} ${whatToParse} NOT FOUND`;
+      throw new ResponseError(404, msg.toUpperCase());
     }
     return result;
   } else {

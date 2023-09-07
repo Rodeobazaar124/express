@@ -6,7 +6,7 @@ import { handleFile, removeFile } from "../middleware/files-middleware";
 
 const Testimony = db.testimony;
 
-export const get = async (req: Request, res: Response, next: NextFunction) => {
+const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.params["id"]) {
       const results = await Testimony.findMany();
@@ -28,7 +28,7 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export const create = async (req: any, res: Response, next: NextFunction) => {
+const create = async (req: any, res: Response, next: NextFunction) => {
   try {
     const valbody = Validate(TestimonyValidation, req.body);
     // Validasi Data yang sudah ada
@@ -57,7 +57,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
   }
 };
 
-export const update = async (req: any, res: Response, next: NextFunction) => {
+const update = async (req: any, res: Response, next: NextFunction) => {
   try {
     const valbody = Validate(TestimonyValidation, req.body);
 
@@ -92,7 +92,7 @@ export const update = async (req: any, res: Response, next: NextFunction) => {
   }
 };
 
-export const remove = async (req: any, res: Response, next: NextFunction) => {
+const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
     const validatedIds = await Validate(IdValidation, req.params["id"]);
     const theTestimony = await Testimony.findFirst({
@@ -112,3 +112,5 @@ export const remove = async (req: any, res: Response, next: NextFunction) => {
     next(e);
   }
 };
+
+export default { create, get, update, remove };

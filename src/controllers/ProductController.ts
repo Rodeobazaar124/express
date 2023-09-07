@@ -1,29 +1,27 @@
 import { NextFunction, Request, Response } from "express";
 import { db } from "../app/database";
 import { IdValidation, Validate } from "../validation/validation";
-import { PortofolioValidation } from "../validation/PortofolioValidation";
-import { ResponseError } from "../error/response-error";
+import { ProductBodyValidation } from "../validation/ProductValidation";
 import { handleFile, removeFile } from "../middleware/files-middleware";
-const portofolio = db.portofolio;
+import { ResponseError } from "../error/response-error";
+
+const product = db.product;
 
 const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.params["id"]) {
-      const results = await portofolio.findMany();
+      const results = await product.findMany();
       return res.status(200).json({ data: results });
     }
     await Validate(IdValidation, req.params["id"]);
-    const result = await portofolio.findFirst({
+    const result = await product.findFirst({
       where: {
         id: parseInt(req.params["id"]),
       },
     });
 
     if (result === null) {
-      throw new ResponseError(
-        404,
-        `Portofolio with ID ${req.params["id"]} not found`
-      );
+      return res.status(404).json({ errors: "Data Not Found" });
     }
     return res.status(200).json({ data: result });
   } catch (e) {
@@ -33,16 +31,17 @@ const get = async (req: Request, res: Response, next: NextFunction) => {
 
 const create = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const valbody = Validate(PortofolioValidation, req.body);
-    const portofolioExist = await portofolio.findFirst({
+    const valbody = await Validate(ProductBodyValidation, req.body);
+    const ProductExist = await product.findFirst({
       where: {
         title: valbody.title,
       },
     });
-    if (portofolioExist !== null)
-      return res.status(409).json({ error: "portofolio already exist" });
-    const { filename, url } = handleFile(req, "image");
-    await portofolio.create({
+    if (ProductExist !== null)
+      return res.status(409).json({ error: "Product already exist" });
+    const { filename, url } = await handleFile(req, "image");
+
+    await product.create({
       data: {
         title: req.body.title,
         image: url,
@@ -50,7 +49,7 @@ const create = async (req: any, res: Response, next: NextFunction) => {
         filename: filename,
       },
     });
-    res.status(201).json({ message: `portofolio created successfully` });
+    res.status(201).json({ message: `Product created successfully` });
   } catch (e) {
     next(e);
   }
@@ -58,18 +57,18 @@ const create = async (req: any, res: Response, next: NextFunction) => {
 
 const update = async (req: any, res: Response, next: NextFunction) => {
   try {
-    await Validate(PortofolioValidation, req.body);
-    const theportofolio = await portofolio.findFirst({
+    await Validate(ProductBodyValidation, req.body);
+
+    // Validate If data exist
+    const theProduct = await product.findFirst({
       where: { id: parseInt(req.params["id"]) },
     });
-    if (theportofolio === null) {
-      throw new ResponseError(
-        404,
-        `Portofolio with ID ${req.params["id"]} not found`
-      );
+    if (theProduct === null) {
+      throw new ResponseError(404, `Product ${req.params["id"]} Not exist!`);
     }
     const { filename: newname, url: newurl } = handleFile(req, "image");
-    await portofolio.update({
+    // set the data
+    await product.update({
       data: {
         desc: req.body.desc,
         title: req.body.title,
@@ -80,8 +79,11 @@ const update = async (req: any, res: Response, next: NextFunction) => {
         id: parseInt(req.params["id"]),
       },
     });
-    await removeFile(theportofolio);
-    return res.status(200).json({ message: "Data Updated Succesfully" });
+
+    await removeFile(theProduct);
+    return res
+      .status(200)
+      .json({ message: `Data ${req.params["id"]} Updated Succesfully` });
   } catch (e) {
     next(e);
   }
@@ -90,24 +92,19 @@ const update = async (req: any, res: Response, next: NextFunction) => {
 const remove = async (req: any, res: Response, next: NextFunction) => {
   try {
     const validatedIds = await Validate(IdValidation, req.params["id"]);
-    if (validatedIds === null) {
-      return;
-    }
 
-    const theportofolio = await portofolio.findFirst({
+    const theProduct = await product.findFirst({
       where: { id: validatedIds },
     });
 
-    if (theportofolio === null) {
-      return res
-        .status(404)
-        .json({ error: `Portofolio with ID ${req.params["id"]} Not exist!` });
+    if (theProduct === null) {
+      throw new ResponseError(404, `Product ${validatedIds} Not exist!`);
     }
 
-    await portofolio.delete({ where: { id: theportofolio.id } });
-    await removeFile(theportofolio);
+    await product.delete({ where: { id: parseInt(req.params["id"]) } });
+    removeFile(theProduct);
     return res.status(200).json({
-      message: `Portofolio with ID ${validatedIds} Deleted Succesfully`,
+      message: `Product with ID ${validatedIds} Deleted Succesfully`,
     });
   } catch (e) {
     next(e);

@@ -20,7 +20,7 @@ export const db = new PrismaClient({
       level: "warn",
     },
   ],
-  errorFormat: "minimal",
+  errorFormat: "colorless",
 });
 
 db.$on("error", (e) => {

@@ -81,7 +81,7 @@ model User {
 
 model Partnership {
   id        Int      @id @default(autoincrement())
-  name      String?
+  name      String   @unique
   image     String
   filename  String
   createdAt DateTime @default(now())

@@ -1,75 +1,56 @@
-import {
-  createRange,
-  updateRange,
-  deleteRange,
-} from "../controllers/RangeController";
 import express, { Request, Response } from "express";
-import {
-  create as cHero,
-  update as uHero,
-  remove as delHero,
-} from "../controllers/HeroController";
-import {
-  create as cPartner,
-  update as uPartner,
-  remove as delPartner,
-} from "../controllers/PartnerController";
-import {
-  create as cProd,
-  update as uProd,
-  remove as delProd,
-} from "../controllers/ProductsController";
-import {
-  create as cService,
-  update as uService,
-  remove as delService,
-} from "../controllers/servicesController";
-import {
-  create as cTestimony,
-  update as uTestimony,
-  remove as delTestimony,
-} from "../controllers/TestimonyController";
+import range from "../controllers/RangeController";
+import hero from "../controllers/HeroController";
+import partner from "../controllers/PartnerController";
+import product from "../controllers/ProductController";
+import service from "../controllers/serviceController";
+import testimony from "../controllers/TestimonyController";
+import porto from "../controllers/PortofolioController";
+
 import { isAuthenticated } from "../middleware/authMiddleware";
-import {
-  create as cPorto,
-  remove as delPorto,
-  update as uPorto,
-} from "../controllers/PortofolioController";
 const PrivateRoutes = express.Router();
 
 if (process.env.AUTH_ENABLED == "true") {
   PrivateRoutes.use(isAuthenticated);
 }
 // HERO
-PrivateRoutes.post("/hero", cHero);
-PrivateRoutes.route("/hero/:id").patch(uHero);
-PrivateRoutes.route("/hero/:id").delete(delHero);
+PrivateRoutes.route("/hero(/:id)?")
+  .patch(hero.update)
+  .post(hero.create)
+  .delete(hero.remove);
 
 // PARTNER
-PrivateRoutes.post("/partner", cPartner);
-PrivateRoutes.route("/partner/:id").patch(uPartner);
-PrivateRoutes.route("/partner/:id").delete(delPartner);
+PrivateRoutes.route("/partner(/:id)?")
+  .patch(partner.update)
+  .post(partner.create)
+  .delete(partner.remove);
 
 // PRODUCT
-PrivateRoutes.post("/product", cProd);
-PrivateRoutes.route("/product/:id").patch(uProd);
-PrivateRoutes.route("/product/:id").delete(delProd);
+PrivateRoutes.route("/product(/:id)?")
+  .post(product.create)
+  .patch(product.update)
+  .delete(product.remove);
 
 // SERVICES
-PrivateRoutes.post("/service", cService);
-PrivateRoutes.route("/service/:id").patch(uService);
-PrivateRoutes.route("/service/:id").delete(delService);
-// TESTIMONY
-PrivateRoutes.post("/testimony", cTestimony);
-PrivateRoutes.route("/testimony/:id").patch(uTestimony);
-PrivateRoutes.route("/testimony/:id").delete(delTestimony);
+PrivateRoutes.route("/service(/:id)?")
+  .post(service.create)
+  .patch(service.update)
+  .delete(service.remove);
 
-PrivateRoutes.post("/portofolio", cPorto);
-PrivateRoutes.route("/portofolio/:id").patch(uPorto);
-PrivateRoutes.route("/portofolio/:id").delete(delPorto);
+// TESTIMONY
+PrivateRoutes.route("/testimony(/:id)?")
+  .post(testimony.create)
+  .patch(testimony.update)
+  .delete(testimony.remove);
+
+PrivateRoutes.route("/portofolio(/:id)?")
+  .post(porto.create)
+  .patch(porto.update)
+  .delete(porto.remove);
 
 // NOIU IN RANGE
-PrivateRoutes.post("/range", createRange);
-PrivateRoutes.route("/range/:slug").patch(updateRange);
-PrivateRoutes.route("/range/:slug").delete(deleteRange);
+PrivateRoutes.route("/range(/:slug)?")
+  .post(range.create)
+  .patch(range.update)
+  .delete(range.remove);
 export default PrivateRoutes;
