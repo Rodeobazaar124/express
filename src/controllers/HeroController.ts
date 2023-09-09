@@ -120,17 +120,18 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const valIds = await Validate(IdValidation, req.params["id"]);
+    const valIds: number = await Validate(IdValidation, req.params["id"]);
+
     const { result } = await checkExistsThrow(
       "Hero",
       "id",
-      parseInt(valIds),
+      valIds,
       Action.DELETE
     );
     await hero.delete({ where: { id: valIds } });
     return res
       .status(200)
-      .json({ message: `Hero ID ${result.id} deleted successfully` });
+      .json({ message: `Hero ID ${valIds} deleted successfully` });
   } catch (e) {
     next(e);
   }

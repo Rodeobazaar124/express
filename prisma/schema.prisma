@@ -43,7 +43,7 @@ model Service {
 
 model Testimony {
   id        Int      @id @default(autoincrement())
-  username  String
+  username  String   @unique
   location  String
   comment   String   @db.Text
   rating    Float
@@ -67,7 +67,7 @@ model Hero {
 model User {
   id            String         @id @default(uuid())
   name          String?
-  username      String?
+  username      String         @unique
   email         String         @unique
   password      String
   job           String?

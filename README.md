@@ -58,3 +58,10 @@ pnpm dev
 /product
 /product/{id}
 ```
+
+
+### TODO
+- [ ] Implement automatic test  
+- [ ] Check unexpected #bug after manual test  
+- [ ] Refactor auth  
+  

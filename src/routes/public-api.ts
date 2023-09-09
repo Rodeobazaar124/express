@@ -1,3 +1,7 @@
+/*
+ Ini adalah Route publik, semua rute disini bisa diakses secara bebas oleh public
+ */
+
 import { Router } from "express";
 
 import range from "../controllers/RangeController";

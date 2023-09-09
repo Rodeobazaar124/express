@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { logger } from "./logging";
 
+
+// Instansiasi prisma dengan winton logger
 export const db = new PrismaClient({
   log: [
     {

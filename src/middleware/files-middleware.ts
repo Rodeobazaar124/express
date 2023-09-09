@@ -6,6 +6,8 @@ import { ResponseError } from "../error/response-error";
 import fs from "fs";
 import fsp from "fs/promises";
 
+
+//  Ini adalah sekumpulan variabel untuk cek ekstensi, ukuran maksimal file gambar
 const mb = parseInt(process.env.FILE_SIZE_LIMIT_IN_MB) || 5;
 const FILESIZE_LIMIT: number = mb * 1024 * 1024;
 const allowedType = [".png", ".jpg", ".svg", ".jpeg", ".bmp", ".gif"];

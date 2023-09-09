@@ -1,3 +1,7 @@
+/*
+ Ini adalah Route protected, semua aksi disini memerlukan autentikasi (bila fitur autentikasi di aktifkan) 
+ */
+
 import express, { Request, Response } from "express";
 import range from "../controllers/RangeController";
 import hero from "../controllers/HeroController";
@@ -6,10 +10,11 @@ import product from "../controllers/ProductController";
 import service from "../controllers/serviceController";
 import testimony from "../controllers/TestimonyController";
 import porto from "../controllers/PortofolioController";
-
 import { isAuthenticated } from "../middleware/authMiddleware";
 const PrivateRoutes = express.Router();
 
+
+// Cek apakah fitur autentikasi dihidupkan dari env
 if (process.env.AUTH_ENABLED == "true") {
   PrivateRoutes.use(isAuthenticated);
 }
