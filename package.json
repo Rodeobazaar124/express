@@ -20,7 +20,7 @@
   "scripts": {
     "build": "tsc",
     "start-js": "tsc && node dist/index.js",
-    "start": "ts-node src/index.ts",
+    "start": "dist/index.js",
     "dev": "nodemon src/index.ts",
     "seed": "ts-node dbseeder.ts",
     "studio": "prisma studio",

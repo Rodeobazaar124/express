@@ -14,3 +14,4 @@ dist/error
 dist/index.js
 dist/middleware
 dist/routes
+dist/test
